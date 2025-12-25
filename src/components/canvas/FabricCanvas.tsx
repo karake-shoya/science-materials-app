@@ -1,13 +1,14 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { DragEvent, useEffect, useRef, useState } from "react"
 import { fabric } from "fabric"
 
 interface FabricCanvasProps {
   onLoaded: (canvas: fabric.Canvas) => void
+  onDrop?: (e: DragEvent<HTMLDivElement>, canvas: fabric.Canvas) => void
 }
 
-export default function FabricCanvas({ onLoaded }: FabricCanvasProps) {
+export default function FabricCanvas({ onLoaded, onDrop }: FabricCanvasProps) {
   const canvasEl = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -45,8 +46,25 @@ export default function FabricCanvas({ onLoaded }: FabricCanvasProps) {
     }
   }, [onLoaded])
 
+  const handlerDragOver = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = "copy"
+  }
+
+  const handlerDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    if (fabricRef.current && onDrop) {
+      onDrop(e, fabricRef.current)
+    }
+  }
+
   return (
-    <div ref={containerRef} className="w-full h-full bg-slate-100 p-8 overflow-hidden">
+    <div
+      ref={containerRef}
+      className="w-full h-full bg-slate-100 p-8 overflow-hidden"
+      onDragOver={handlerDragOver}
+      onDrop={handlerDrop}
+    >
       <div className="shadow-lg mx-auto bg-white">
         <canvas ref={canvasEl} />
       </div>

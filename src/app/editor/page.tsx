@@ -1,10 +1,12 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, DragEvent } from "react"
 import dynamic from "next/dynamic"
 import { fabric } from "fabric"
 import { Button } from "@/components/ui/button"
 import { Square, Circle as CircleIcon, Type, Download } from "lucide-react"
+import { AssetSiderbar } from "@/components/editor/AssetSiderbar"
+import { SCIENCE_ASSETS } from "@/data/science-assets"
 
 const FabricCanvas = dynamic(() => import("@/components/canvas/FabricCanvas"), {
   ssr: false,
@@ -59,6 +61,37 @@ export default function EditorPage() {
     canvas.setActiveObject(text)
   }
 
+  const handleCanvasDrop = (e: DragEvent<HTMLDivElement>, canvas: fabric.Canvas) => {
+    if (!canvas) return
+    const assetId = e.dataTransfer.getData("assetId")
+    const asset = SCIENCE_ASSETS.find((a) => a.id === assetId)
+    if (!asset) return
+
+    const pointer = canvas.getPointer(e.nativeEvent)
+
+    const svgString = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="${asset.viewBox}" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="${asset.svgPath}" />
+      </svg>
+    `
+    fabric.loadSVGFromString(svgString, (objects, options) => {
+      const obj = fabric.util.groupSVGElements(objects, options)
+
+      obj.set({
+        left: pointer.x,
+        top: pointer.y,
+        originX: "center",
+        originY: "center",
+        scaleX: 2,
+        scaleY: 2,
+      })
+
+      canvas.add(obj)
+      canvas.setActiveObject(obj)
+      canvas.renderAll()
+    })
+  }
+
   return (
     <div className="flex h-screen flex-col">
       <header className="flex h-16 item-center border-b px-4 gap-2 bg-white z-10">
@@ -81,10 +114,12 @@ export default function EditorPage() {
           保存
         </Button>
       </header>
-
-      <main className="flex-1 relative bg-slate-100">
-        <FabricCanvas onLoaded={onCanvasLoaded} />
-      </main>
+      <div className="flex flex-1 overflow-hidden relative">
+        <AssetSiderbar />
+        <main className="flex-1 relative bg-slate-100 overflow-hidden">
+          <FabricCanvas onLoaded={onCanvasLoaded} onDrop={handleCanvasDrop} />
+        </main>
+      </div>
     </div>
   )
 }
