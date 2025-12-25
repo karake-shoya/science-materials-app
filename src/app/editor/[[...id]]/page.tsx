@@ -22,6 +22,14 @@ import { toast } from "sonner"
 import { useEffect, useRef } from "react"
 import { useParams } from "next/navigation"
 import { getCanvasById } from "@/app/editor/actions"
+import { jsPDF } from "jspdf"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { ChevronDown, Printer } from "lucide-react"
 
 const FabricCanvas = dynamic(() => import("@/components/canvas/FabricCanvas"), {
   ssr: false,
@@ -180,6 +188,47 @@ export default function EditorPage() {
       setIsSaving(false)
     }
   }
+  const exportToPDF = useCallback((format: "a4" | "b4" = "a4") => {
+    if (!canvas) return
+    toast.info("PDFを生成中...", { description: "高画質で処理しています。"})
+
+    const dataUrl = canvas.toDataURL({
+      format: "png",
+      multiplier: 3,
+    })
+
+    const orientation = "p"
+    const pdf = new jsPDF(orientation, "mm", format)
+
+    const pdfWidth = pdf.internal.pageSize.getWidth()
+    const pdfHeight = pdf.internal.pageSize.getHeight()
+
+    // キャンバスのアスペクト比を計算
+    const canvasWidth = canvas.getWidth()
+    const canvasHeight = canvas.getHeight()
+    const canvasRatio = canvasWidth / canvasHeight
+
+    // PDFに収まるサイズを計算（アスペクト比を維持）
+    let imgWidth = pdfWidth
+    let imgHeight = pdfWidth / canvasRatio
+
+    // 高さがはみ出す場合は高さ基準で再計算
+    if (imgHeight > pdfHeight) {
+      imgHeight = pdfHeight
+      imgWidth = pdfHeight * canvasRatio
+    }
+
+    // 中央に配置
+    const x = (pdfWidth - imgWidth) / 2
+    const y = (pdfHeight - imgHeight) / 2
+
+    pdf.addImage(dataUrl, "PNG", x, y, imgWidth, imgHeight)
+
+    const fileName = `${projectTitle || "science-material"}.pdf`
+    pdf.save(fileName)
+
+    toast.success("PDFを出力しました")
+  }, [canvas, projectTitle])
 
   return (
     <div className="flex h-screen flex-col overflow-hidden">
@@ -195,6 +244,22 @@ export default function EditorPage() {
         </div>
 
         <div className="flex-1" />
+        
+        <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <Printer className="mr-2 h-4 w-4" />
+                PDF出力
+                <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => exportToPDF("a4")}>A4サイズで出力</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => exportToPDF("b4")}>B4サイズで出力</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
         <Button onClick={handleSaveClick} disabled={isSaving}>
           <Save className="mr-2 h-4 w-4" />
