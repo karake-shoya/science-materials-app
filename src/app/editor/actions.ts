@@ -52,3 +52,35 @@ export async function saveCanvas(
     return { success: true, id: data.id }
   }
 }
+
+export async function getUserCanvases() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return []
+
+  const { data } = await supabase
+    .from("canvases")
+    .select("id, title, updated_at")
+    .eq("user_id", user.id)
+    .order("updated_at", { ascending: false })
+
+  return data || []
+}
+
+export async function getCanvasById(id: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { error: "Unauthorized"}
+
+  const { data, error } = await supabase
+    .from("canvases")
+    .select("*")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .single()
+
+  if (error) return { error: error.message }
+  return { data, error: null }
+}

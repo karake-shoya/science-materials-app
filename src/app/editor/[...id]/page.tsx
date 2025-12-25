@@ -8,7 +8,7 @@ import { Square, Circle as CircleIcon, Type, Download, Save } from "lucide-react
 import { AssetSiderbar } from "@/components/editor/AssetSiderbar"
 import { SCIENCE_ASSETS } from "@/data/science-assets"
 
-import { saveCanvas } from "./actions"
+import { saveCanvas } from "@/app/editor/actions"
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
+import { useEffect, useRef } from "react"
+import { useParams } from "next/navigation"
+import { getCanvasById } from "@/app/editor/actions"
 
 const FabricCanvas = dynamic(() => import("@/components/canvas/FabricCanvas"), {
   ssr: false,
@@ -26,16 +29,47 @@ const FabricCanvas = dynamic(() => import("@/components/canvas/FabricCanvas"), {
 })
 
 export default function EditorPage() {
-  const [canvas, setCanvas] = useState<fabric.Canvas | null>(null)
+  const params = useParams()
+  const idParam = params?.id ? (Array.isArray(params.id) ? params.id[0] : params.id) : null
 
+  const [canvas, setCanvas] = useState<fabric.Canvas | null>(null)
   const [canvasId, setCanvasId] = useState<string | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [projectTitle, setProjectTitle] = useState("無題のプロジェクト")
   const [isSaving, setIsSaving] = useState(false)
+  const isLoadedRef = useRef(false)
 
   const onCanvasLoaded = useCallback((canvasInstance: fabric.Canvas) => {
     setCanvas(canvasInstance)
-}, [])
+  }, [])
+
+  useEffect(() => {
+    const loadProject = async () => {
+      if (!canvas || !idParam || isLoadedRef.current) return
+
+      const { data, error } = await getCanvasById(idParam)
+
+      if (error || !data) {
+        toast.error("読み込みエラー", { description: error || "プロジェクトが見つかりませんでした。" })
+        return
+      }
+
+      setCanvasId(data.id)
+      setProjectTitle(data.title)
+      console.log("DB data:", data.data)
+
+      const jsonContent = typeof data.data === "string" ? JSON.parse(data.data) : data.data
+
+      canvas.loadFromJSON(jsonContent, () => {
+        console.log("Fabric loadFromJSON finished")
+        console.log("Objects on canvas:", canvas.getObjects().length)
+        canvas.requestRenderAll()
+        isLoadedRef.current = true
+        toast.success("読み込み完了", { description: `${data.title} を読み込みました。` })
+      })
+    }
+    loadProject()
+  }, [canvas, idParam])
 
   const addRect = () => {
     if (!canvas) return
