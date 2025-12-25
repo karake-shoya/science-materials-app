@@ -4,7 +4,8 @@ import { useState, useCallback, DragEvent } from "react"
 import dynamic from "next/dynamic"
 import { fabric } from "fabric"
 import { Button } from "@/components/ui/button"
-import { Square, Circle as CircleIcon, Type, Save, ChevronDown, Download, FileImage, Printer, Trash2 } from "lucide-react"
+import { Square, Circle as CircleIcon, Type, Save, ChevronDown, Download, FileImage, Printer, Trash2, Home } from "lucide-react"
+import Link from "next/link"
 import { AssetSidebar } from "@/components/editor/AssetSidebar"
 import { SCIENCE_ASSETS } from "@/data/science-assets"
 
@@ -538,6 +539,12 @@ export default function EditorPage() {
   return (
     <div className="flex h-screen flex-col overflow-hidden">
       <header className="flex h-16 item-center border-b px-4 gap-2 bg-white z-10">
+        <Link href="/dashboard">
+          <Button variant="ghost" size="icon" title="ダッシュボードに戻る">
+            <Home className="h-5 w-5" />
+          </Button>
+        </Link>
+        
         <h1 className="font-bold mr-4 text-lg">
           {projectTitle}
         </h1>
