@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -18,7 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { FileText, MoreVertical, Trash2 } from "lucide-react"
+import { FileText, MoreHorizontal, Trash2 } from "lucide-react"
 import { deleteCanvas } from "@/app/editor/actions"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
@@ -57,31 +57,29 @@ export function ProjectCard({ project, formattedDate }: ProjectCardProps) {
 
   return (
     <>
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col group">
-        <Link href={`/editor/${project.id}`} className="flex-1">
-          <div className="aspect-video w-full bg-slate-200 relative flex items-center justify-center">
-            <FileText className="h-12 w-12 text-slate-400" />
+      <Card className="group relative overflow-hidden hover:shadow-md transition-all duration-200 border-border/60">
+        <Link href={`/editor/${project.id}`} className="block">
+          <div className="aspect-[4/3] w-full bg-muted/50 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-xl bg-background border border-border/60 flex items-center justify-center">
+              <FileText className="h-7 w-7 text-muted-foreground/60" />
+            </div>
           </div>
-          <CardHeader className="p-4">
-            <CardTitle className="text-base line-clamp-1">{project.title}</CardTitle>
+          <div className="p-4">
+            <h3 className="font-medium text-sm line-clamp-1 mb-1">{project.title}</h3>
             <p className="text-xs text-muted-foreground">{formattedDate}</p>
-          </CardHeader>
+          </div>
         </Link>
-        <CardFooter className="p-4 pt-0 mt-auto flex justify-between items-center">
-          <Link href={`/editor/${project.id}`} className="flex-1">
-            <Button variant="ghost" size="sm" className="w-full text-slate-500">
-              編集を開く
-            </Button>
-          </Link>
+        
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical className="h-4 w-4" />
+              <Button variant="secondary" size="icon" className="h-8 w-8 shadow-sm">
+                <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem
-                className="text-red-600 cursor-pointer"
+                className="text-destructive cursor-pointer focus:text-destructive"
                 onClick={() => setIsDeleteDialogOpen(true)}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
@@ -89,7 +87,7 @@ export function ProjectCard({ project, formattedDate }: ProjectCardProps) {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </CardFooter>
+        </div>
       </Card>
 
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
@@ -113,4 +111,3 @@ export function ProjectCard({ project, formattedDate }: ProjectCardProps) {
     </>
   )
 }
-

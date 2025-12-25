@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,13 +14,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { ArrowLeft, User, Mail, Lock, Trash2 } from "lucide-react"
+import { ArrowLeft, User, Mail, Lock, Trash2, Zap } from "lucide-react"
 import { toast } from "sonner"
 import { getUser, updateDisplayName, updatePassword, deleteAccount } from "./actions"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 
 export default function MyPage() {
-  const router = useRouter()
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const [displayName, setDisplayName] = useState("")
   const [isUpdatingName, setIsUpdatingName] = useState(false)
@@ -92,42 +90,60 @@ export default function MyPage() {
 
   if (!user) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p>読み込み中...</p>
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+          <span>読み込み中...</span>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-8">
-      <div className="mx-auto max-w-2xl space-y-6">
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
-          <h1 className="text-3xl font-bold">マイページ</h1>
+    <div className="min-h-screen bg-background">
+      {/* ヘッダー */}
+      <header className="sticky top-0 z-50 border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="mx-auto max-w-2xl px-6 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link href="/dashboard">
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            </Link>
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center">
+                <Zap className="h-4 w-4 text-primary-foreground" />
+              </div>
+              <span className="font-semibold">アカウント設定</span>
+            </div>
+          </div>
         </div>
+      </header>
 
+      {/* メインコンテンツ */}
+      <main className="mx-auto max-w-2xl px-6 py-8 space-y-6">
         {/* 表示名設定 */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
+        <Card className="border-border/60">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-base font-medium">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <User className="h-4 w-4 text-primary" />
+              </div>
               表示名
             </CardTitle>
-            <CardDescription>他のユーザーに表示される名前を設定できます</CardDescription>
+            <CardDescription className="ml-10">
+              ダッシュボードに表示される名前を設定できます
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleUpdateDisplayName} className="flex gap-4">
+          <CardContent className="ml-10">
+            <form onSubmit={handleUpdateDisplayName} className="flex gap-3">
               <Input
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder="表示名を入力"
                 className="flex-1"
               />
-              <Button type="submit" disabled={isUpdatingName}>
+              <Button type="submit" disabled={isUpdatingName} size="sm">
                 {isUpdatingName ? "更新中..." : "更新"}
               </Button>
             </form>
@@ -135,51 +151,61 @@ export default function MyPage() {
         </Card>
 
         {/* メールアドレス */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Mail className="h-5 w-5" />
+        <Card className="border-border/60">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-base font-medium">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Mail className="h-4 w-4 text-primary" />
+              </div>
               メールアドレス
             </CardTitle>
-            <CardDescription>ログインに使用しているメールアドレス</CardDescription>
+            <CardDescription className="ml-10">
+              ログインに使用しているメールアドレス
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-lg">{user.email}</p>
+          <CardContent className="ml-10">
+            <p className="text-sm font-mono bg-muted/50 px-3 py-2 rounded-md inline-block">
+              {user.email}
+            </p>
           </CardContent>
         </Card>
 
         {/* パスワード変更 */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lock className="h-5 w-5" />
+        <Card className="border-border/60">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-base font-medium">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Lock className="h-4 w-4 text-primary" />
+              </div>
               パスワード変更
             </CardTitle>
-            <CardDescription>新しいパスワードを設定できます（6文字以上）</CardDescription>
+            <CardDescription className="ml-10">
+              新しいパスワードを設定できます（6文字以上）
+            </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="ml-10">
             <form onSubmit={handleUpdatePassword} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="newPassword">新しいパスワード</Label>
+                <Label htmlFor="newPassword" className="text-sm">新しいパスワード</Label>
                 <Input
                   id="newPassword"
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="新しいパスワード"
+                  placeholder="••••••••"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">パスワード確認</Label>
+                <Label htmlFor="confirmPassword" className="text-sm">パスワード確認</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="パスワードを再入力"
+                  placeholder="••••••••"
                 />
               </div>
-              <Button type="submit" disabled={isUpdatingPassword || !newPassword || !confirmPassword}>
+              <Button type="submit" disabled={isUpdatingPassword || !newPassword || !confirmPassword} size="sm">
                 {isUpdatingPassword ? "更新中..." : "パスワードを変更"}
               </Button>
             </form>
@@ -187,26 +213,30 @@ export default function MyPage() {
         </Card>
 
         {/* アカウント削除 */}
-        <Card className="border-red-200">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-red-600">
-              <Trash2 className="h-5 w-5" />
-              アカウント削除
+        <Card className="border-destructive/30">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-base font-medium">
+              <div className="w-8 h-8 rounded-lg bg-destructive/10 flex items-center justify-center">
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </div>
+              <span className="text-destructive">アカウント削除</span>
             </CardTitle>
-            <CardDescription>
-              アカウントを削除すると、すべてのプロジェクトが削除されます。この操作は取り消せません。
+            <CardDescription className="ml-10">
+              アカウントを削除すると、すべてのプロジェクトが削除されます。
+              この操作は取り消せません。
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="ml-10">
             <Button
               variant="destructive"
+              size="sm"
               onClick={() => setIsDeleteDialogOpen(true)}
             >
               アカウントを削除
             </Button>
           </CardContent>
         </Card>
-      </div>
+      </main>
 
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
@@ -230,4 +260,3 @@ export default function MyPage() {
     </div>
   )
 }
-

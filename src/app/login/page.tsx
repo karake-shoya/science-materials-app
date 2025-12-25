@@ -10,42 +10,81 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { Zap } from "lucide-react"
+import Link from "next/link"
 
 export default function LoginPage() {
   return (
-    <div className="flex h-screen items-center justify-center bg-gray-50">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>中学理科教材アプリへようこそ</CardTitle>
-          <CardDescription>アカウントを作成するか、ログインしてください</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <label htmlFor="email">Email</label>
-              <Input id="email" name="email" type="email" placeholder="teacher@school.ed.jp" />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background px-4">
+      <div className="w-full max-w-sm space-y-6">
+        {/* ロゴ */}
+        <div className="flex flex-col items-center gap-2 mb-8">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+              <Zap className="h-6 w-6 text-primary-foreground" />
             </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" required />
-            </div>
-            <div className="flex flex-col gap-2 pt-4">
-              <Button formAction={login}>ログイン</Button>
-              <Button formAction={sighnup} variant="outline">新規登録</Button>
+          </Link>
+          <h1 className="text-xl font-semibold">ScienceEditor</h1>
+        </div>
+
+        <Card className="border-border/60">
+          <CardHeader className="text-center pb-4">
+            <CardTitle className="text-lg">ログイン</CardTitle>
+            <CardDescription>
+              アカウントを作成するか、ログインしてください
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="email" className="text-sm">メールアドレス</Label>
+                <Input 
+                  id="email" 
+                  name="email" 
+                  type="email" 
+                  placeholder="teacher@school.ed.jp"
+                  className="h-10"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="password" className="text-sm">パスワード</Label>
+                <Input 
+                  id="password" 
+                  name="password" 
+                  type="password" 
+                  required
+                  className="h-10"
+                />
+              </div>
+              <div className="flex flex-col gap-2 pt-2">
+                <Button formAction={login} className="h-10">
+                  ログイン
+                </Button>
+                <Button formAction={sighnup} variant="outline" className="h-10">
+                  新規登録
+                </Button>
+              </div>
+
               <div className="relative my-2">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
+                  <span className="w-full border-t border-border" />
                 </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-gray-500">Or continue with</span>
+                <div className="relative flex justify-center text-xs">
+                  <span className="bg-card px-3 text-muted-foreground">または</span>
                 </div>
               </div>
 
               <GoogleLoginButton />
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+            </form>
+          </CardContent>
+        </Card>
+
+        <p className="text-center text-sm text-muted-foreground">
+          <Link href="/" className="hover:text-foreground transition-colors">
+            ← トップページに戻る
+          </Link>
+        </p>
+      </div>
     </div>
   )
 }
