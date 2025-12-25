@@ -1,26 +1,47 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Plus, Clock } from 'lucide-react'
+import { Plus, Clock, LogOut, User } from 'lucide-react'
 import { getUserCanvases } from '@/app/editor/actions'
 import { formatDistanceToNow } from 'date-fns'
 import { ja } from 'date-fns/locale'
 import { ProjectCard } from '@/components/dashboard/ProjectCard'
+import { signOut } from '@/app/login/actions'
+import { createClient } from '@/lib/supabase/server'
 
 export default async function DashboardPage() {
-  // サーバーサイドでデータを取得
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const displayName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'ゲスト'
+  
   const projects = await getUserCanvases()
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        <Link href="/editor">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            新規作成
-          </Button>
-        </Link>
+        <div>
+          <p className="text-slate-600 mb-1">{displayName}さん、ようこそ！</p>
+          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link href="/editor">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              新規作成
+            </Button>
+          </Link>
+          <Link href="/mypage">
+            <Button variant="outline" size="icon" title="マイページ">
+              <User className="h-4 w-4" />
+            </Button>
+          </Link>
+          <form action={signOut}>
+            <Button variant="outline" type="submit">
+              <LogOut className="mr-2 h-4 w-4" />
+              ログアウト
+            </Button>
+          </form>
+        </div>
       </div>
 
       <div className="space-y-4">
