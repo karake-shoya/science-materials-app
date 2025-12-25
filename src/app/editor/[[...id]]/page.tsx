@@ -4,7 +4,7 @@ import { useState, useCallback, DragEvent } from "react"
 import dynamic from "next/dynamic"
 import { fabric } from "fabric"
 import { Button } from "@/components/ui/button"
-import { Square, Circle as CircleIcon, Type, Download, Save } from "lucide-react"
+import { Square, Circle as CircleIcon, Type, Save, ChevronDown, Download, FileImage, Printer } from "lucide-react"
 import { AssetSiderbar } from "@/components/editor/AssetSiderbar"
 import { SCIENCE_ASSETS } from "@/data/science-assets"
 
@@ -28,8 +28,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
-import { ChevronDown, Printer } from "lucide-react"
 
 const FabricCanvas = dynamic(() => import("@/components/canvas/FabricCanvas"), {
   ssr: false,
@@ -230,6 +230,27 @@ export default function EditorPage() {
     toast.success("PDFを出力しました")
   }, [canvas, projectTitle])
 
+  const exportToImage = useCallback(() => {
+    if (!canvas) return
+
+    toast.info("画像を生成中...", { description: "高画質で処理しています。"})
+
+    const dataUrl = canvas.toDataURL({
+      format: "png",
+      multiplier: 3,
+    })
+    const link = document.createElement("a")
+    link.href = dataUrl
+    const fileName = `${projectTitle || `science-material`}.png`
+    link.download = fileName
+
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    toast.success("画像を出力しました", { description: fileName})
+  }, [canvas, projectTitle])
+
   return (
     <div className="flex h-screen flex-col overflow-hidden">
       <header className="flex h-16 item-center border-b px-4 gap-2 bg-white z-10">
@@ -249,22 +270,35 @@ export default function EditorPage() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline">
-                <Printer className="mr-2 h-4 w-4" />
-                PDF出力
+                <Download className="mr-2 h-4 w-4" />
+                出力
                 <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => exportToPDF("a4")}>A4サイズで出力</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => exportToPDF("b4")}>B4サイズで出力</DropdownMenuItem>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={exportToImage} className="cursor-pointer">
+                <FileImage className="mr-2 h-4 w-4" />
+                画像を保存（PNG）
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem onClick={() => exportToPDF("a4")} className="cursor-pointer">
+                <Printer className="mr-2 h-4 w-4" />
+                PDFを保存（A4）
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => exportToPDF("b4")} className="cursor-pointer">
+                <Printer className="mr-2 h-4 w-4" />
+                PDFを保存（B4）
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
 
         <Button onClick={handleSaveClick} disabled={isSaving}>
           <Save className="mr-2 h-4 w-4" />
           {isSaving ? "保存中..." : "保存"}
         </Button>
+        </div>
       </header>
 
       <div className="flex flex-1 overflow-hidden relative">
