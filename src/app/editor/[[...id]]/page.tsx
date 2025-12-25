@@ -4,14 +4,15 @@ import { useState, useCallback, DragEvent } from "react"
 import dynamic from "next/dynamic"
 import { fabric } from "fabric"
 import { Button } from "@/components/ui/button"
-import { Square, Circle as CircleIcon, Type, Save, ChevronDown, Download, FileImage, Printer } from "lucide-react"
+import { Square, Circle as CircleIcon, Type, Save, ChevronDown, Download, FileImage, Printer, Trash2 } from "lucide-react"
 import { AssetSidebar } from "@/components/editor/AssetSidebar"
 import { SCIENCE_ASSETS } from "@/data/science-assets"
 
-import { saveCanvas } from "@/app/editor/actions"
+import { saveCanvas, deleteCanvas } from "@/app/editor/actions"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -20,7 +21,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import { useEffect, useRef } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { getCanvasById } from "@/app/editor/actions"
 import { jsPDF } from "jspdf"
 import {
@@ -91,13 +92,16 @@ const findNearestConnectionPoint = (
 
 export default function EditorPage() {
   const params = useParams()
+  const router = useRouter()
   const idParam = params?.id ? (Array.isArray(params.id) ? params.id[0] : params.id) : null
 
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null)
   const [canvasId, setCanvasId] = useState<string | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [projectTitle, setProjectTitle] = useState("無題のプロジェクト")
   const [isSaving, setIsSaving] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const isLoadedRef = useRef(false)
   const [isGridEnabled, setIsGridEnabled] = useState(true)
   const highlightCircleRef = useRef<fabric.Circle | null>(null)
@@ -511,6 +515,26 @@ export default function EditorPage() {
     toast.success("画像を出力しました", { description: fileName})
   }, [canvas, projectTitle])
 
+  const handleDelete = async () => {
+    if (!canvasId) return
+    
+    setIsDeleting(true)
+    try {
+      const result = await deleteCanvas(canvasId)
+      if (result.error) {
+        toast.error("削除エラー", { description: result.error })
+      } else {
+        toast.success("削除完了", { description: `${projectTitle} を削除しました。` })
+        router.push("/dashboard")
+      }
+    } catch {
+      toast.error("予期せぬエラーが発生しました")
+    } finally {
+      setIsDeleting(false)
+      setIsDeleteDialogOpen(false)
+    }
+  }
+
   return (
     <div className="flex h-screen flex-col overflow-hidden">
       <header className="flex h-16 item-center border-b px-4 gap-2 bg-white z-10">
@@ -558,6 +582,18 @@ export default function EditorPage() {
           <Save className="mr-2 h-4 w-4" />
           {isSaving ? "保存中..." : "保存"}
         </Button>
+        
+        {canvasId && (
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={() => setIsDeleteDialogOpen(true)}
+            title="削除"
+            className="text-red-500 hover:text-red-600 hover:bg-red-50"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
         </div>
       </header>
 
@@ -580,6 +616,23 @@ export default function EditorPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDialogOpen(false)}>キャンセル</Button>
             <Button onClick={() => executeSave(projectTitle)} disabled={isSaving}>{isSaving ? "保存中..." : "保存"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>プロジェクトを削除</DialogTitle>
+            <DialogDescription>
+              「{projectTitle}」を削除しますか？この操作は取り消せません。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>キャンセル</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+              {isDeleting ? "削除中..." : "削除"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -84,3 +84,21 @@ export async function getCanvasById(id: string) {
   if (error) return { error: error.message }
   return { data, error: null }
 }
+
+export async function deleteCanvas(canvasId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { error: "Unauthorized" }
+
+  const { error } = await supabase
+    .from("canvases")
+    .delete()
+    .eq("id", canvasId)
+    .eq("user_id", user.id)
+
+  if (error) return { error: error.message }
+  
+  revalidatePath("/dashboard")
+  return { success: true }
+}

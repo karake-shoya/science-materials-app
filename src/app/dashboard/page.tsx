@@ -1,10 +1,11 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Clock, FileText } from 'lucide-react'
-import { getUserCanvases } from '@/app/editor/actions' // 作成したアクション
-import { formatDistanceToNow } from 'date-fns' // 日付フォーマット用(後述) or そのまま表示
+import { Card } from '@/components/ui/card'
+import { Plus, Clock } from 'lucide-react'
+import { getUserCanvases } from '@/app/editor/actions'
+import { formatDistanceToNow } from 'date-fns'
 import { ja } from 'date-fns/locale'
+import { ProjectCard } from '@/components/dashboard/ProjectCard'
 
 export default async function DashboardPage() {
   // サーバーサイドでデータを取得
@@ -46,26 +47,11 @@ export default async function DashboardPage() {
 
             {/* プロジェクト一覧 */}
             {projects.map((project) => (
-              <Link key={project.id} href={`/editor/${project.id}`}>
-                <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
-                  <div className="aspect-video w-full bg-slate-200 relative flex items-center justify-center">
-                    {/* サムネイル機能は未実装なのでアイコンで代用 */}
-                    <FileText className="h-12 w-12 text-slate-400" />
-                  </div>
-                  <CardHeader className="p-4">
-                    <CardTitle className="text-base line-clamp-1">{project.title}</CardTitle>
-                    <p className="text-xs text-muted-foreground">
-                      {/* 日付表示 (date-fnsがない場合は project.updated_at をそのまま表示でもOK) */}
-                      {formatDistanceToNow(new Date(project.updated_at), { addSuffix: true, locale: ja })}
-                    </p>
-                  </CardHeader>
-                  <CardFooter className="p-4 pt-0 mt-auto">
-                    <Button variant="ghost" size="sm" className="w-full text-slate-500">
-                      編集を開く
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </Link>
+              <ProjectCard 
+                key={project.id} 
+                project={project}
+                formattedDate={formatDistanceToNow(new Date(project.updated_at), { addSuffix: true, locale: ja })}
+              />
             ))}
           </div>
         )}
