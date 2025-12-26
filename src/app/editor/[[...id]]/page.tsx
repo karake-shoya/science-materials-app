@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Square, Circle as CircleIcon, Type, Save, ChevronDown, Download, FileImage, Printer, Trash2, Home, Copy, Clipboard } from "lucide-react"
 import Link from "next/link"
 import { AssetSidebar } from "@/components/editor/AssetSidebar"
-import { SCIENCE_ASSETS } from "@/data/science-assets"
 import { saveCanvas, deleteCanvas } from "@/app/editor/actions"
+import type { PlaceSymbolOptions } from "@/components/canvas/FabricCanvas"
 import {
   Dialog,
   DialogContent,
@@ -110,6 +110,8 @@ export default function EditorPage() {
   const [isDeleting, setIsDeleting] = useState(false)
   const isLoadedRef = useRef(false)
   const [isGridEnabled, setIsGridEnabled] = useState(true)
+  const [selectedSymbol, setSelectedSymbol] = useState<string | null>(null)
+  const selectedSymbolRef = useRef<string | null>(null)
   const highlightCircleRef = useRef<fabric.Circle | null>(null)
   const startConnectionRef = useRef<ConnectionPoint | null>(null)
   const previewLineRef = useRef<fabric.Polyline | null>(null)
@@ -127,6 +129,11 @@ export default function EditorPage() {
 
   const isGridEnabledRef = useRef(isGridEnabled)
   isGridEnabledRef.current = isGridEnabled
+
+  // selectedSymbol の変更を ref に反映
+  useEffect(() => {
+    selectedSymbolRef.current = selectedSymbol
+  }, [selectedSymbol])
 
   // canvasRefを最新に保つ
   useEffect(() => {
@@ -465,6 +472,12 @@ export default function EditorPage() {
 
     // mouse:move - 接続ポイントのハイライト表示 & 導線のプレビュー
     canvasInstance.on('mouse:move', (options) => {
+      // 記号配置モード中は導線処理をスキップ
+      if (selectedSymbolRef.current) {
+        updateHighlightCircle(null)
+        return
+      }
+
       const pointer = canvasInstance.getPointer(options.e)
       
       // 接続待ち状態の場合（始点が選択済み）
@@ -505,6 +518,11 @@ export default function EditorPage() {
 
     // mouse:down - 接続ポイントからの導線開始/終了
     canvasInstance.on('mouse:down', (options) => {
+      // 記号配置モード中は導線処理をスキップ
+      if (selectedSymbolRef.current) {
+        return
+      }
+
       const pointer = canvasInstance.getPointer(options.e)
       
       // オブジェクト操作中は導線処理をスキップ
@@ -679,6 +697,53 @@ export default function EditorPage() {
     saveHistory()
   }
 }, [saveHistory])
+
+  // クリック/ドラッグで記号を配置
+  const handlePlaceSymbol = useCallback((options: PlaceSymbolOptions) => {
+    if (!canvas) return
+
+    const { symbolId, x, y, width } = options
+    // width はスケール値として使用
+    const scale = width || 1
+
+    let symbol: fabric.Object | null = null
+
+    switch (symbolId) {
+      case "lamp":
+        symbol = Factory.createLamp({ left: x, top: y })
+        break
+      case "resistor":
+        symbol = Factory.createResistor({ left: x, top: y })
+        break
+      case "source":
+        symbol = Factory.createPowerSource({ left: x, top: y })
+        break
+      case "meter_a":
+        symbol = Factory.createMeter("A", { left: x, top: y })
+        break
+      case "meter_v":
+        symbol = Factory.createMeter("V", { left: x, top: y })
+        break
+      case "switch":
+        symbol = Factory.createSwitch({ left: x, top: y })
+        break
+    }
+
+    if (symbol) {
+      // スケール適用
+      if (scale !== 1) {
+        symbol.scale(scale)
+      }
+      canvas.add(symbol)
+      canvas.setActiveObject(symbol)
+      canvas.renderAll()
+      saveHistory()
+    }
+  }, [canvas, saveHistory])
+
+  const handleClearSelection = useCallback(() => {
+    setSelectedSymbol(null)
+  }, [])
 
   const handleSaveClick = () => {
     if (!canvas) return
@@ -909,9 +974,18 @@ export default function EditorPage() {
       </header>
 
       <div className="flex flex-1 overflow-hidden relative">
-        <AssetSidebar />
+        <AssetSidebar 
+          selectedSymbol={selectedSymbol}
+          onSelectSymbol={setSelectedSymbol}
+        />
         <main className="flex-1 relative bg-slate-100 overflow-hidden">
-          <FabricCanvas onLoaded={onCanvasLoaded} onDrop={handleCanvasDrop} />
+          <FabricCanvas 
+            onLoaded={onCanvasLoaded} 
+            onDrop={handleCanvasDrop}
+            selectedSymbol={selectedSymbol}
+            onPlaceSymbol={handlePlaceSymbol}
+            onClearSelection={handleClearSelection}
+          />
           <WireOverlay ref={wireOverlayRef} fabricCanvas={canvas} />
         </main>
       </div>
