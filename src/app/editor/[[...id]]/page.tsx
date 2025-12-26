@@ -4,11 +4,10 @@ import { useState, useCallback, DragEvent } from "react"
 import dynamic from "next/dynamic"
 import { fabric } from "fabric"
 import { Button } from "@/components/ui/button"
-import { Square, Circle as CircleIcon, Type, Save, ChevronDown, Download, FileImage, Printer, Trash2, Home } from "lucide-react"
+import { Square, Circle as CircleIcon, Type, Save, ChevronDown, Download, FileImage, Printer, Trash2, Home, Copy, Clipboard } from "lucide-react"
 import Link from "next/link"
 import { AssetSidebar } from "@/components/editor/AssetSidebar"
 import { SCIENCE_ASSETS } from "@/data/science-assets"
-
 import { saveCanvas, deleteCanvas } from "@/app/editor/actions"
 import {
   Dialog,
@@ -38,6 +37,12 @@ const FabricCanvas = dynamic(() => import("@/components/canvas/FabricCanvas"), {
   ssr: false,
   loading: () => <div className="w-full h-ful flex items-center justify-center">Loading Editor...</div>,
 })
+
+const WireOverlay = dynamic(() => import("@/components/canvas/WireOverlay"), {
+  ssr: false,
+})
+
+import type { WireOverlayHandle } from "@/components/canvas/WireOverlay"
 
 const GRID_SIZE = 20
 const SNAP_DISTANCE = 15
@@ -108,9 +113,205 @@ export default function EditorPage() {
   const highlightCircleRef = useRef<fabric.Circle | null>(null)
   const startConnectionRef = useRef<ConnectionPoint | null>(null)
   const previewLineRef = useRef<fabric.Polyline | null>(null)
+  const clipboardRef = useRef<fabric.Object | null>(null)
+  const wireOverlayRef = useRef<WireOverlayHandle | null>(null)
+  
+  // Undo/Redo用の履歴管理
+  const historyRef = useRef<string[]>([])
+  const historyIndexRef = useRef(-1)
+  const isUndoRedoRef = useRef(false)
+  const canvasRef = useRef<fabric.Canvas | null>(null)
+  const saveHistoryTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const MAX_HISTORY = 50
+  const DEBOUNCE_DELAY = 200 // 連続した変更を1つにまとめる
 
   const isGridEnabledRef = useRef(isGridEnabled)
   isGridEnabledRef.current = isGridEnabled
+
+  // canvasRefを最新に保つ
+  useEffect(() => {
+    canvasRef.current = canvas
+  }, [canvas])
+
+  // 履歴に現在の状態を保存（デバウンス付き）
+  const saveHistory = useCallback(() => {
+    // 既存のタイマーをクリア
+    if (saveHistoryTimeoutRef.current) {
+      clearTimeout(saveHistoryTimeoutRef.current)
+    }
+    
+    // デバウンス：一定時間後に履歴を保存
+    saveHistoryTimeoutRef.current = setTimeout(() => {
+      const currentCanvas = canvasRef.current
+      if (!currentCanvas || isUndoRedoRef.current) return
+      
+      const json = JSON.stringify(currentCanvas.toJSON())
+      
+      // 前回と同じ状態なら保存しない
+      if (historyRef.current[historyIndexRef.current] === json) {
+        return
+      }
+      
+      // 現在位置より後の履歴を削除（新しい操作が入ったら）
+      if (historyIndexRef.current < historyRef.current.length - 1) {
+        historyRef.current = historyRef.current.slice(0, historyIndexRef.current + 1)
+      }
+      
+      // 履歴に追加
+      historyRef.current.push(json)
+      
+      // 最大履歴数を超えたら古いものを削除
+      if (historyRef.current.length > MAX_HISTORY) {
+        historyRef.current.shift()
+      } else {
+        historyIndexRef.current++
+      }
+      console.log("History saved:", historyIndexRef.current, historyRef.current.length)
+    }, DEBOUNCE_DELAY)
+  }, [])
+
+  // Undo
+  const undo = useCallback(() => {
+    const currentCanvas = canvasRef.current
+    if (!currentCanvas) {
+      console.log("Undo: No canvas")
+      return
+    }
+    if (historyIndexRef.current <= 0) {
+      console.log("Undo: No more history", historyIndexRef.current)
+      return
+    }
+    
+    isUndoRedoRef.current = true
+    historyIndexRef.current--
+    
+    const json = historyRef.current[historyIndexRef.current]
+    console.log("Undo to:", historyIndexRef.current)
+    currentCanvas.loadFromJSON(JSON.parse(json), () => {
+      currentCanvas.renderAll()
+      isUndoRedoRef.current = false
+      toast.success("元に戻しました")
+    })
+  }, [])
+
+  // Redo
+  const redo = useCallback(() => {
+    const currentCanvas = canvasRef.current
+    if (!currentCanvas) {
+      console.log("Redo: No canvas")
+      return
+    }
+    if (historyIndexRef.current >= historyRef.current.length - 1) {
+      console.log("Redo: No more history", historyIndexRef.current, historyRef.current.length)
+      return
+    }
+    
+    isUndoRedoRef.current = true
+    historyIndexRef.current++
+    
+    const json = historyRef.current[historyIndexRef.current]
+    console.log("Redo to:", historyIndexRef.current)
+    currentCanvas.loadFromJSON(JSON.parse(json), () => {
+      currentCanvas.renderAll()
+      isUndoRedoRef.current = false
+      toast.success("やり直しました")
+    })
+  }, [])
+
+  // 選択中のオブジェクトを削除
+  const deleteSelected = useCallback(() => {
+    if (!canvas) return
+    const activeObject = canvas.getActiveObject()
+    if (activeObject) {
+      canvas.remove(activeObject)
+      canvas.discardActiveObject()
+      canvas.renderAll()
+      toast.success("削除しました")
+    }
+  }, [canvas])
+
+  // 選択中のオブジェクトをコピー
+  const copySelected = useCallback(() => {
+    if (!canvas) return
+    const activeObject = canvas.getActiveObject()
+    if (activeObject) {
+      activeObject.clone((cloned: fabric.Object) => {
+        clipboardRef.current = cloned
+        toast.success("コピーしました")
+      })
+    }
+  }, [canvas])
+
+  // クリップボードからペースト
+  const pasteFromClipboard = useCallback(() => {
+    if (!canvas || !clipboardRef.current) return
+    
+    clipboardRef.current.clone((cloned: fabric.Object) => {
+      canvas.discardActiveObject()
+      cloned.set({
+        left: (cloned.left || 0) + 20,
+        top: (cloned.top || 0) + 20,
+        evented: true,
+      })
+      // @ts-expect-error - custom id property
+      cloned.id = `${cloned.type || 'object'}-${Date.now()}`
+      
+      canvas.add(cloned)
+      canvas.setActiveObject(cloned)
+      canvas.renderAll()
+      toast.success("ペーストしました")
+    })
+  }, [canvas])
+
+  // キーボードショートカット
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // テキスト入力中は無視
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return
+      }
+
+      // Delete or Backspace - 削除
+      if (e.key === "Delete" || e.key === "Backspace") {
+        e.preventDefault()
+        deleteSelected()
+      }
+
+      // Ctrl+C or Cmd+C - コピー
+      if ((e.ctrlKey || e.metaKey) && e.key === "c") {
+        e.preventDefault()
+        copySelected()
+      }
+
+      // Ctrl+V or Cmd+V - ペースト
+      if ((e.ctrlKey || e.metaKey) && e.key === "v") {
+        e.preventDefault()
+        pasteFromClipboard()
+      }
+
+      // Ctrl+D or Cmd+D - 複製（コピー＆即ペースト）
+      if ((e.ctrlKey || e.metaKey) && e.key === "d") {
+        e.preventDefault()
+        copySelected()
+        setTimeout(() => pasteFromClipboard(), 50)
+      }
+
+      // Ctrl+Z or Cmd+Z - 元に戻す（Undo）
+      if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
+        e.preventDefault()
+        undo()
+      }
+
+      // Ctrl+Shift+Z or Cmd+Shift+Z - やり直し（Redo）
+      if ((e.ctrlKey || e.metaKey) && e.key === "z" && e.shiftKey) {
+        e.preventDefault()
+        redo()
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [deleteSelected, copySelected, pasteFromClipboard, undo, redo])
 
   // 自動折れ曲がりの中間点を計算
   const calculateWirePoints = (start: ConnectionPoint, endX: number, endY: number): {x: number, y: number}[] => {
@@ -136,6 +337,24 @@ export default function EditorPage() {
   const onCanvasLoaded = useCallback((canvasInstance: fabric.Canvas) => {
     setCanvas(canvasInstance)
 
+    // 初期状態を履歴に保存
+    const initialState = JSON.stringify(canvasInstance.toJSON())
+    historyRef.current = [initialState]
+    historyIndexRef.current = 0
+
+    // オブジェクトの変更完了時に履歴を保存
+    canvasInstance.on("object:modified", () => {
+      saveHistory()
+    })
+
+    // 注意: object:added は使わない（Groupの場合、パーツごとに発火するため）
+    // 代わりに、追加処理の後で明示的にsaveHistory()を呼ぶ
+
+    // オブジェクト削除時に履歴を保存
+    canvasInstance.on("object:removed", () => {
+      saveHistory()
+    })
+
     canvasInstance.on("object:moving", (options) => {
       if (!isGridEnabledRef.current) return
 
@@ -151,6 +370,31 @@ export default function EditorPage() {
       const target = options.target!
       const angle = target.angle!
       target.set('angle', Math.round(angle / 15) * 15)
+    })
+
+    canvasInstance.on('object:scaling', (options) => {
+      if (!isGridEnabledRef.current) return
+      const target = options.target!
+      const baseWidth = target.width || 1
+      const baseHeight = target.height || 1
+      
+      // 現在のサイズを計算
+      const currentWidth = baseWidth * (target.scaleX || 1)
+      const currentHeight = baseHeight * (target.scaleY || 1)
+      
+      // グリッドサイズにスナップ
+      const snappedWidth = Math.round(currentWidth / GRID_SIZE) * GRID_SIZE
+      const snappedHeight = Math.round(currentHeight / GRID_SIZE) * GRID_SIZE
+      
+      // 最小サイズを確保（グリッドサイズ以上）
+      const finalWidth = Math.max(snappedWidth, GRID_SIZE)
+      const finalHeight = Math.max(snappedHeight, GRID_SIZE)
+      
+      // スケールを再計算
+      target.set({
+        scaleX: finalWidth / baseWidth,
+        scaleY: finalHeight / baseHeight,
+      })
     })
 
     // ハイライト用の円を作成/更新するヘルパー
@@ -302,7 +546,7 @@ export default function EditorPage() {
       }
     }
     document.addEventListener('keydown', handleKeyDown)
-  }, [calculateWirePoints])
+  }, [calculateWirePoints, saveHistory])
 
   useEffect(() => {
     const loadProject = async () => {
@@ -332,7 +576,7 @@ export default function EditorPage() {
     loadProject()
   }, [canvas, idParam])
 
-  const addRect = () => {
+  const addRect = useCallback(() => {
     if (!canvas) return
     const rect = new fabric.Rect({
       left: 100,
@@ -345,11 +589,14 @@ export default function EditorPage() {
       originX: 'center',
       originY: 'center',
     })
+    // @ts-expect-error - custom id property
+    rect.id = `rect-${Date.now()}`
     canvas.add(rect)
     canvas.setActiveObject(rect)
-  }
+    saveHistory()
+  }, [canvas, saveHistory])
 
-  const addCircle = () => {
+  const addCircle = useCallback(() => {
     if (!canvas) return
     const circle = new fabric.Circle({
       left: 200,
@@ -361,11 +608,14 @@ export default function EditorPage() {
       originX: 'center',
       originY: 'center',
     })
+    // @ts-expect-error - custom id property
+    circle.id = `circle-${Date.now()}`
     canvas.add(circle)
     canvas.setActiveObject(circle)
-  }
+    saveHistory()
+  }, [canvas, saveHistory])
 
-  const addText = () => {
+  const addText = useCallback(() => {
     if (!canvas) return
     const text = new fabric.IText("テキスト", {
       left: 300,
@@ -375,11 +625,14 @@ export default function EditorPage() {
       originX: 'center',
       originY: 'center',
     })
+    // @ts-expect-error - custom id property
+    text.id = `text-${Date.now()}`
     canvas.add(text)
     canvas.setActiveObject(text)
-  }
+    saveHistory()
+  }, [canvas, saveHistory])
 
-  const handleCanvasDrop = (e: DragEvent<HTMLDivElement>, canvas: fabric.Canvas) => {
+  const handleCanvasDrop = useCallback((e: DragEvent<HTMLDivElement>, canvas: fabric.Canvas) => {
     if (!canvas) return
 
     const symbolId = e.dataTransfer.getData("symbolId")
@@ -413,8 +666,9 @@ export default function EditorPage() {
     canvas.add(symbol)
     canvas.setActiveObject(symbol)
     canvas.renderAll()
+    saveHistory()
   }
-}
+}, [saveHistory])
 
   const handleSaveClick = () => {
     if (!canvas) return
@@ -453,14 +707,49 @@ export default function EditorPage() {
       setIsSaving(false)
     }
   }
-  const exportToPDF = useCallback((format: "a4" | "b4" = "a4") => {
-    if (!canvas) return
-    toast.info("PDFを生成中...", { description: "高画質で処理しています。"})
+  // 導線をFabric.jsに一時的に追加してエクスポート用のデータURLを取得
+  const getExportDataUrl = useCallback(() => {
+    if (!canvas) return null
 
+    // ReactFlowの導線をFabric.jsに追加
+    const wireLines: fabric.Line[] = []
+    if (wireOverlayRef.current) {
+      const edgeData = wireOverlayRef.current.getEdgesForExport()
+      edgeData.forEach(edge => {
+        const line = new fabric.Line(
+          [edge.sourceX, edge.sourceY, edge.targetX, edge.targetY],
+          {
+            stroke: '#000',
+            strokeWidth: 2,
+            selectable: false,
+            evented: false,
+          }
+        )
+        wireLines.push(line)
+        canvas.add(line)
+      })
+      canvas.renderAll()
+    }
+
+    // データURLを取得
     const dataUrl = canvas.toDataURL({
       format: "png",
       multiplier: 3,
     })
+
+    // 一時的に追加した導線を削除
+    wireLines.forEach(line => canvas.remove(line))
+    canvas.renderAll()
+
+    return dataUrl
+  }, [canvas])
+
+  const exportToPDF = useCallback((format: "a4" | "b4" = "a4") => {
+    if (!canvas) return
+    toast.info("PDFを生成中...", { description: "高画質で処理しています。"})
+
+    const dataUrl = getExportDataUrl()
+    if (!dataUrl) return
 
     const orientation = "p"
     const pdf = new jsPDF(orientation, "mm", format)
@@ -493,17 +782,16 @@ export default function EditorPage() {
     pdf.save(fileName)
 
     toast.success("PDFを出力しました")
-  }, [canvas, projectTitle])
+  }, [canvas, projectTitle, getExportDataUrl])
 
   const exportToImage = useCallback(() => {
     if (!canvas) return
 
     toast.info("画像を生成中...", { description: "高画質で処理しています。"})
 
-    const dataUrl = canvas.toDataURL({
-      format: "png",
-      multiplier: 3,
-    })
+    const dataUrl = getExportDataUrl()
+    if (!dataUrl) return
+
     const link = document.createElement("a")
     link.href = dataUrl
     const fileName = `${projectTitle || `science-material`}.png`
@@ -514,7 +802,7 @@ export default function EditorPage() {
     document.body.removeChild(link)
 
     toast.success("画像を出力しました", { description: fileName})
-  }, [canvas, projectTitle])
+  }, [canvas, projectTitle, getExportDataUrl])
 
   const handleDelete = async () => {
     if (!canvasId) return
@@ -553,6 +841,12 @@ export default function EditorPage() {
           <Button variant="outline" size="icon" onClick={addRect} title="四角形"><Square className="h-4 w-4" /></Button>
           <Button variant="outline" size="icon" onClick={addCircle} title="円"><CircleIcon className="h-4 w-4" /></Button>
           <Button variant="outline" size="icon" onClick={addText} title="テキスト"><Type className="h-4 w-4" /></Button>
+        </div>
+
+        <div className="flex items-center gap-1 border-r pr-4 mr-2">
+          <Button variant="outline" size="icon" onClick={copySelected} title="コピー (Ctrl+C)"><Copy className="h-4 w-4" /></Button>
+          <Button variant="outline" size="icon" onClick={pasteFromClipboard} title="ペースト (Ctrl+V)"><Clipboard className="h-4 w-4" /></Button>
+          <Button variant="outline" size="icon" onClick={deleteSelected} title="削除 (Delete)" className="text-red-500 hover:text-red-600"><Trash2 className="h-4 w-4" /></Button>
         </div>
 
         <div className="flex-1" />
@@ -608,6 +902,7 @@ export default function EditorPage() {
         <AssetSidebar />
         <main className="flex-1 relative bg-slate-100 overflow-hidden">
           <FabricCanvas onLoaded={onCanvasLoaded} onDrop={handleCanvasDrop} />
+          <WireOverlay ref={wireOverlayRef} fabricCanvas={canvas} />
         </main>
       </div>
 

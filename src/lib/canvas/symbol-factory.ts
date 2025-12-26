@@ -5,6 +5,10 @@ const STROKE_COLOR = '#000000'
 const STROKE_WIDTH = 2
 const FILL_COLOR = 'transparent'
 
+// ユニークID生成
+let idCounter = 0
+const generateId = (prefix: string) => `${prefix}-${Date.now()}-${++idCounter}`
+
 /**
  * 豆電球 (〇の中に×)
  */
@@ -32,12 +36,15 @@ export const createLamp = (options: fabric.IObjectOptions) => {
     originY: 'center',
   })
 
-  return new fabric.Group([circle, line1, line2], {
+  const group = new fabric.Group([circle, line1, line2], {
     ...options,
     name: 'lamp',
     originX: 'center',
     originY: 'center',
   })
+  // @ts-expect-error - custom property for unique ID
+  group.id = generateId('lamp')
+  return group
 }
 
 /**
@@ -54,12 +61,15 @@ export const createResistor = (options: fabric.IObjectOptions) => {
     originY: 'center',
   })
 
-  return new fabric.Group([rect], {
+  const group = new fabric.Group([rect], {
     ...options,
     name: 'resistor',
     originX: 'center',
     originY: 'center',
   })
+  // @ts-expect-error - custom property for unique ID
+  group.id = generateId('resistor')
+  return group
 }
 
 /**
@@ -82,12 +92,15 @@ export const createPowerSource = (options: fabric.IObjectOptions) => {
     left: -5
   })
 
-  return new fabric.Group([plusLine, minusLine], {
+  const group = new fabric.Group([plusLine, minusLine], {
     ...options,
     name: 'power_source',
     originX: 'center',
     originY: 'center',
   })
+  // @ts-expect-error - custom property for unique ID
+  group.id = generateId('power_source')
+  return group
 }
 
 /**
@@ -111,12 +124,15 @@ export const createMeter = (label: 'A' | 'V' | 'G', options: fabric.IObjectOptio
     originY: 'center',
   })
 
-  return new fabric.Group([circle, text], {
+  const group = new fabric.Group([circle, text], {
     ...options,
     name: `meter_${label.toLowerCase()}`,
     originX: 'center',
     originY: 'center',
   })
+  // @ts-expect-error - custom property for unique ID
+  group.id = generateId(`meter_${label.toLowerCase()}`)
+  return group
 }
 
 /**
@@ -132,10 +148,13 @@ export const createSwitch = (options: fabric.IObjectOptions) => {
     originY: 'bottom',
   })
 
-  return new fabric.Group([dot1, dot2, arm], {
+  const group = new fabric.Group([dot1, dot2, arm], {
     ...options,
     name: 'switch',
     originX: 'center',
     originY: 'center',
   })
+  // @ts-expect-error - custom property for unique ID
+  group.id = generateId('switch')
+  return group
 }
