@@ -13,9 +13,50 @@ export default async function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
+      {/* 背景パターン */}
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        {/* ベースグラデーション */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-accent/5" />
+        
+        {/* グリッドパターン */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, rgba(100, 100, 100, 0.1) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(100, 100, 100, 0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '40px 40px'
+          }}
+        />
+        
+        {/* 回路/分子パターン（SVG） */}
+        <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="circuit-pattern" x="0" y="0" width="200" height="200" patternUnits="userSpaceOnUse">
+              {/* ノード（接点/分子） */}
+              <circle cx="40" cy="40" r="3" fill="rgba(100, 100, 100, 0.15)" />
+              <circle cx="160" cy="80" r="4" fill="rgba(100, 100, 100, 0.15)" />
+              <circle cx="80" cy="160" r="3" fill="rgba(100, 100, 100, 0.15)" />
+              <circle cx="180" cy="180" r="2" fill="rgba(100, 100, 100, 0.15)" />
+              
+              {/* 接続線（回路/結合） */}
+              <path d="M40 40 L100 40 L100 80 L160 80" stroke="rgba(100, 100, 100, 0.12)" strokeWidth="1" fill="none" />
+              <path d="M160 80 L160 140 L80 140 L80 160" stroke="rgba(100, 100, 100, 0.12)" strokeWidth="1" fill="none" />
+              <path d="M80 160 L140 160 L140 180 L180 180" stroke="rgba(100, 100, 100, 0.12)" strokeWidth="1" fill="none" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#circuit-pattern)" />
+        </svg>
+        
+        {/* アクセントのぼかし */}
+        <div className="absolute top-20 right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-40 left-10 w-64 h-64 bg-accent/20 rounded-full blur-3xl" />
+      </div>
+
       {/* ヘッダー */}
-      <header className="border-b border-border/50">
+      <header className="border-b border-border/5 bg-background/5 backdrop-blur-sm sticky top-0 z-10">
         <div className="mx-auto max-w-5xl px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
@@ -32,7 +73,7 @@ export default async function Home() {
       </header>
 
       {/* メインコンテンツ */}
-      <main className="mx-auto max-w-5xl px-6">
+      <main className="mx-auto max-w-5xl px-6 bg-background/5 backdrop-blur-sm">
         {/* ヒーローセクション */}
         <section className="py-20 md:py-32">
           <div className="max-w-2xl">
@@ -93,10 +134,10 @@ export default async function Home() {
       </main>
 
       {/* フッター */}
-      <footer className="border-t border-border/50 mt-20">
+      <footer className="border-t border-border/5 mt-20 bg-background/80 backdrop-blur-sm sticky bottom-0 z-10">
         <div className="mx-auto max-w-5xl px-6 py-8">
           <p className="text-sm text-muted-foreground text-center">
-            © 2024 ScienceEditor. 教育現場で自由にご利用ください。
+            © {new Date().getFullYear()} ScienceEditor. 教育現場で自由にご利用ください。
           </p>
         </div>
       </footer>
