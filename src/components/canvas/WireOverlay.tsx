@@ -27,8 +27,8 @@ export interface WireOverlayHandle {
 }
 
 // 接続ポイント付きノードコンポーネント
-function ConnectionNode({ data }: { data: { label: string; width: number; height: number } }) {
-  const { width, height } = data
+function ConnectionNode({ data }: { data: { label: string; width: number; height: number; angle: number } }) {
+  const { width, height, angle } = data
   const handleSize = 14
 
   // 共通のハンドルスタイル
@@ -52,7 +52,13 @@ function ConnectionNode({ data }: { data: { label: string; width: number; height
   return (
     <div 
       className="relative pointer-events-none"
-      style={{ width, height, marginLeft: -width / 2, marginTop: -height / 2 }}
+      style={{ 
+        width, 
+        height, 
+        marginLeft: -width / 2, 
+        marginTop: -height / 2,
+        transform: `rotate(${angle}deg)`,
+      }}
     >
       {handles.map(({ position, id, style }) => (
         <div key={id}>
@@ -93,10 +99,12 @@ function fabricObjectToNode(obj: fabric.Object, index: number): Node | null {
     return null
   }
 
+  // 元のサイズ（回転なし）を使用
   const width = (obj.width || 0) * (obj.scaleX || 1)
   const height = (obj.height || 0) * (obj.scaleY || 1)
+  const angle = obj.angle || 0
   
-  // getCenterPoint()を使って、グループ内でも正確な中心座標を取得
+  // getCenterPoint()で正確な中心座標を取得
   const center = obj.getCenterPoint()
   const centerX = center.x
   const centerY = center.y
@@ -113,6 +121,7 @@ function fabricObjectToNode(obj: fabric.Object, index: number): Node | null {
       fabricObject: obj,
       width: Math.max(width, 20),  // 最小サイズを確保
       height: Math.max(height, 20),
+      angle,
     },
     draggable: false,
     selectable: false,
@@ -207,6 +216,8 @@ const WireOverlay = forwardRef<WireOverlayHandle, WireOverlayProps>(({ fabricCan
     fabricCanvas.on("object:removed", handleObjectRemoved)
     fabricCanvas.on("object:modified", handleObjectModified)
     fabricCanvas.on("object:moving", handleObjectMoving)
+    fabricCanvas.on("object:rotating", handleObjectMoving)
+    fabricCanvas.on("object:scaling", handleObjectMoving)
 
     return () => {
       if (rafId !== null) {
@@ -216,6 +227,8 @@ const WireOverlay = forwardRef<WireOverlayHandle, WireOverlayProps>(({ fabricCan
       fabricCanvas.off("object:removed", handleObjectRemoved)
       fabricCanvas.off("object:modified", handleObjectModified)
       fabricCanvas.off("object:moving", handleObjectMoving)
+      fabricCanvas.off("object:rotating", handleObjectMoving)
+      fabricCanvas.off("object:scaling", handleObjectMoving)
     }
   }, [fabricCanvas, syncNodes])
 
