@@ -222,12 +222,22 @@ export default function EditorPage() {
   const deleteSelected = useCallback(() => {
     if (!canvas) return
     const activeObject = canvas.getActiveObject()
-    if (activeObject) {
+    if (!activeObject) return
+
+    // 複数選択の場合
+    if (activeObject.type === 'activeSelection') {
+      const activeSelection = activeObject as fabric.ActiveSelection
+      activeSelection.forEachObject((obj) => {
+        canvas.remove(obj)
+      })
+    } else {
+      // 単一選択の場合
       canvas.remove(activeObject)
-      canvas.discardActiveObject()
-      canvas.renderAll()
-      toast.success("削除しました")
     }
+    
+    canvas.discardActiveObject()
+    canvas.renderAll()
+    toast.success("削除しました")
   }, [canvas])
 
   // 選択中のオブジェクトをコピー
