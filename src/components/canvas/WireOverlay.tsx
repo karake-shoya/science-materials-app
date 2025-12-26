@@ -120,8 +120,8 @@ function fabricObjectToNode(obj: fabric.Object, index: number): Node | null {
 }
 
 const WireOverlay = forwardRef<WireOverlayHandle, WireOverlayProps>(({ fabricCanvas, onWiresChange }, ref) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState([])
-  const [edges, setEdges, onEdgesChange] = useEdgesState([])
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
   const [isConnecting, setIsConnecting] = useState(false)
 
   // ハンドルの位置を計算するヘルパー
