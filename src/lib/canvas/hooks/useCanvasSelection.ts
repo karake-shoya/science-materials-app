@@ -2,7 +2,7 @@ import { useCallback } from "react"
 import { fabric } from "fabric"
 import { toast } from "sonner"
 
-export const useCanvasSelection = (canvas: fabric.Canvas | null) => {
+export const useCanvasSelection = (canvas: fabric.Canvas | null, saveHistory: () => void) => {
   const deleteSelected = useCallback(() => {
     if (!canvas) return
     const activeObject = canvas.getActiveObject()
@@ -21,8 +21,9 @@ export const useCanvasSelection = (canvas: fabric.Canvas | null) => {
     
     canvas.discardActiveObject()
     canvas.renderAll()
+    saveHistory()
     toast.success("削除しました")
-  }, [canvas])
+  }, [canvas, saveHistory])
 
   return {
     deleteSelected

@@ -48,6 +48,28 @@ export const useCanvasHistory = (canvas: fabric.Canvas | null) => {
   }, [])
 
   const undo = useCallback(() => {
+    // 未保存の履歴がある場合は強制保存
+    if (saveHistoryTimeoutRef.current) {
+        clearTimeout(saveHistoryTimeoutRef.current)
+        saveHistoryTimeoutRef.current = null
+        
+        const currentCanvas = canvasRef.current
+        if (currentCanvas && !isUndoRedoRef.current) {
+            const json = JSON.stringify(currentCanvas.toJSON())
+            if (historyRef.current[historyIndexRef.current] !== json) {
+                if (historyIndexRef.current < historyRef.current.length - 1) {
+                    historyRef.current = historyRef.current.slice(0, historyIndexRef.current + 1)
+                }
+                historyRef.current.push(json)
+                if (historyRef.current.length > MAX_HISTORY) {
+                    historyRef.current.shift()
+                } else {
+                    historyIndexRef.current++
+                }
+            }
+        }
+    }
+
     const currentCanvas = canvasRef.current
     if (!currentCanvas || historyIndexRef.current <= 0) return
     
@@ -63,6 +85,28 @@ export const useCanvasHistory = (canvas: fabric.Canvas | null) => {
   }, [])
 
   const redo = useCallback(() => {
+    // 未保存の履歴がある場合は強制保存
+    if (saveHistoryTimeoutRef.current) {
+        clearTimeout(saveHistoryTimeoutRef.current)
+        saveHistoryTimeoutRef.current = null
+        
+        const currentCanvas = canvasRef.current
+        if (currentCanvas && !isUndoRedoRef.current) {
+            const json = JSON.stringify(currentCanvas.toJSON())
+            if (historyRef.current[historyIndexRef.current] !== json) {
+                if (historyIndexRef.current < historyRef.current.length - 1) {
+                    historyRef.current = historyRef.current.slice(0, historyIndexRef.current + 1)
+                }
+                historyRef.current.push(json)
+                if (historyRef.current.length > MAX_HISTORY) {
+                    historyRef.current.shift()
+                } else {
+                    historyIndexRef.current++
+                }
+            }
+        }
+    }
+
     const currentCanvas = canvasRef.current
     if (!currentCanvas || historyIndexRef.current >= historyRef.current.length - 1) return
     

@@ -11,7 +11,8 @@ type ConnectionPoint = {
 
 export const useCanvasConnection = (
     canvas: fabric.Canvas | null,
-    selectedSymbol: string | null
+    selectedSymbol: string | null,
+    saveHistory: () => void
 ) => {
   const highlightCircleRef = useRef<fabric.Circle | null>(null)
   const startConnectionRef = useRef<ConnectionPoint | null>(null)
@@ -229,6 +230,7 @@ export const useCanvasConnection = (
           })
           
           canvas.add(polyline)
+          saveHistory()
           resetWireDrawing()
         }
         // 接続ポイント外でクリック → 何もしない（プレビュー継続）
@@ -253,7 +255,7 @@ export const useCanvasConnection = (
         resetWireDrawing()
     }
 
-  }, [canvas, findNearestConnectionPoint, calculateWirePoints, updateHighlightCircle, updatePreviewLine, resetWireDrawing])
+  }, [canvas, findNearestConnectionPoint, calculateWirePoints, updateHighlightCircle, updatePreviewLine, resetWireDrawing, saveHistory])
 
   return {
     resetWireDrawing,

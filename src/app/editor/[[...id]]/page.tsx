@@ -83,11 +83,11 @@ export default function EditorPage() {
 
   const { 
     deleteSelected 
-  } = useCanvasSelection(canvas)
+  } = useCanvasSelection(canvas, saveHistory)
 
   const { 
     resetWireDrawing 
-  } = useCanvasConnection(canvas, selectedSymbol)
+  } = useCanvasConnection(canvas, selectedSymbol, saveHistory)
 
   useCanvasGrid(canvas, isGridEnabled)
 
