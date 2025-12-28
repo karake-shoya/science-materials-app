@@ -21,6 +21,8 @@ Next.jsとFabric.jsを使用して構築されており、ブラウザ上で手�
 - **出力機能**
   - 画像として保存 (PNG)
   - 印刷用PDFとして保存 (A4, B4対応)
+- **教材自動生成 (Python)**
+  - オームの法則計算問題プリントのPDF自動生成
 
 ## 技術スタック
 
@@ -83,3 +85,30 @@ pnpm dev
 ```
 
 ブラウザで [http://localhost:3000](http://localhost:3000) を開くと、アプリケーションが表示されます。
+
+## 教材生成ツール (Python)
+
+Webアプリ機能とは別に、Pythonを使用して印刷用の問題プリントを自動生成するツールが含まれています。
+現在は「中学2年理科 電流（オームの法則）」の計算問題PDFを作成可能です。
+
+### セットアップと実行
+
+Python 3がインストールされている必要があります。
+
+1. **仮想環境の作成と有効化**
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate  # Mac/Linux
+   # .venv\Scripts\activate   # Windows
+   ```
+
+2. **依存ライブラリのインストール**
+   ```bash
+   pip install -r generator/requirements.txt
+   ```
+
+3. **ツールの実行**
+   ```bash
+   python generator/ohm_law.py
+   ```
+   実行すると `generator/ohm_law_practice.pdf` が生成されます。
