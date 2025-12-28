@@ -633,7 +633,7 @@ export default function EditorPage() {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden">
-      <header className="flex h-16 item-center border-b px-4 gap-2 bg-white z-10">
+      <header className="flex h-16 items-center border-b px-4 gap-2 bg-white z-10">
         <Link href="/dashboard">
           <Button variant="ghost" size="icon" title="ダッシュボードに戻る">
             <Home className="h-5 w-5" />
