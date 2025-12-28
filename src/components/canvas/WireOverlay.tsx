@@ -24,6 +24,9 @@ interface WireOverlayProps {
 
 export interface WireOverlayHandle {
   getEdgesForExport: () => { sourceX: number; sourceY: number; targetX: number; targetY: number }[]
+  addEdges: (edges: Edge[]) => void
+  getEdges: () => Edge[]
+  loadEdges: (edges: Edge[]) => void
 }
 
 // 接続ポイント付きノードコンポーネント
@@ -166,8 +169,15 @@ const WireOverlay = forwardRef<WireOverlayHandle, WireOverlayProps>(({ fabricCan
           targetY: targetPos?.y || 0,
         }
       })
+    },
+    addEdges: (newEdges: Edge[]) => {
+      setEdges((prev) => [...prev, ...newEdges])
+    },
+    getEdges: () => edges,
+    loadEdges: (newEdges: Edge[]) => {
+      setEdges(newEdges)
     }
-  }), [edges, getHandlePosition])
+  }), [edges, getHandlePosition, setEdges])
 
   // Fabric.jsのオブジェクトをReactFlowノードに同期
   const syncNodes = useCallback(() => {

@@ -20,7 +20,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { jsPDF } from "jspdf"
 import {
   DropdownMenu,
@@ -30,6 +30,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import * as Factory from "@/lib/canvas/symbol-factory"
+import { TEMPLATES } from "@/lib/templates"
 
 // Custom Hooks
 import { useCanvasHistory } from "@/lib/canvas/hooks/useCanvasHistory"
@@ -58,6 +59,8 @@ import type { WireOverlayHandle } from "@/components/canvas/WireOverlay"
 export default function EditorPage() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const templateId = searchParams.get('template')
   const idParam = params?.id ? (Array.isArray(params.id) ? params.id[0] : params.id) : null
 
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null)
@@ -104,34 +107,108 @@ export default function EditorPage() {
     resetWireDrawing
   })
 
-  // Load Project
+  // Load Project or Template
   useEffect(() => {
     const loadProject = async () => {
-      if (!canvas || !idParam || isLoadedRef.current) return
+      if (!canvas || isLoadedRef.current) return
 
-      const { data, error } = await getCanvasById(idParam)
+      if (idParam) {
+        // Load from DB
+        const { data, error } = await getCanvasById(idParam)
 
-      if (error || !data) {
-        toast.error("読み込みエラー", { description: error || "プロジェクトが見つかりませんでした。" })
-        return
-      }
+        if (error || !data) {
+          toast.error("読み込みエラー", { description: error || "プロジェクトが見つかりませんでした。" })
+          return
+        }
 
-      setCanvasId(data.id)
-      setProjectTitle(data.title)
-      console.log("DB data:", data.data)
+        setCanvasId(data.id)
+        setProjectTitle(data.title)
+        console.log("DB data:", data.data)
 
-      const jsonContent = typeof data.data === "string" ? JSON.parse(data.data) : data.data
+        const jsonContent = typeof data.data === "string" ? JSON.parse(data.data) : data.data
 
       canvas.loadFromJSON(jsonContent, () => {
         console.log("Fabric loadFromJSON finished")
         console.log("Objects on canvas:", canvas.getObjects().length)
         canvas.requestRenderAll()
+        
+        // 導線の復元
+        // @ts-ignore
+        if (jsonContent.connections && Array.isArray(jsonContent.connections)) {
+           setTimeout(() => {
+             if (wireOverlayRef.current) {
+                // Edge型に合わせる
+                // @ts-ignore
+                const edges = jsonContent.connections.map((c: any) => ({
+                  id: c.id || `wire-${Date.now()}-${Math.random()}`,
+                  source: c.source,
+                  sourceHandle: c.sourceHandle,
+                  target: c.target,
+                  targetHandle: c.targetHandle,
+                  type: "smoothstep",
+                  style: { stroke: "#000", strokeWidth: 2 },
+                }))
+                // @ts-ignore
+                wireOverlayRef.current.loadEdges(edges)
+             }
+           }, 500)
+        }
+
         isLoadedRef.current = true
         toast.success("読み込み完了", { description: `${data.title} を読み込みました。` })
       })
+      } else if (templateId && TEMPLATES[templateId as string]) {
+        // Load Template
+        const tmpl = TEMPLATES[templateId]
+        
+        // Add symbols
+        tmpl.symbols.forEach(s => {
+          let symbol = null
+          const options = { left: s.x, top: s.y }
+          
+          switch (s.type) {
+            case 'lamp': symbol = Factory.createLamp(options); break;
+            case 'resistor': symbol = Factory.createResistor(options); break;
+            case 'source': symbol = Factory.createPowerSource(options); break;
+            case 'switch': symbol = Factory.createSwitch(options); break;
+            case 'meter_a': symbol = Factory.createMeter('A', options); break;
+            case 'meter_v': symbol = Factory.createMeter('V', options); break;
+          }
+
+          if (symbol) {
+            // @ts-ignore
+            symbol.id = s.id
+            canvas.add(symbol)
+          }
+        })
+        
+        canvas.requestRenderAll()
+        saveHistory() // Initialize history with template
+
+        // Add connections (wait for WireOverlay to sync nodes)
+        // 確実にノードが同期されるのを待つために時間を少し空ける
+        setTimeout(() => {
+          if (wireOverlayRef.current) {
+            const edges = tmpl.connections.map((c, i) => ({
+              id: `wire-${Date.now()}-${i}`,
+              source: c.source,
+              sourceHandle: `${c.sourceHandle}-src`, // ReactFlowのHandle IDに合わせてサフィックスを追加
+              target: c.target,
+              targetHandle: `${c.targetHandle}-tgt`, // ReactFlowのHandle IDに合わせてサフィックスを追加
+              type: "smoothstep",
+              style: { stroke: "#000", strokeWidth: 2 },
+            }))
+            // @ts-ignore
+            wireOverlayRef.current.loadEdges(edges)
+          }
+        }, 500)
+
+        isLoadedRef.current = true
+        toast.success("テンプレート読み込み", { description: `${tmpl.name} で作成しました。` })
+      }
     }
     loadProject()
-  }, [canvas, idParam])
+  }, [canvas, idParam, templateId, saveHistory])
 
   const onCanvasLoaded = useCallback((canvasInstance: fabric.Canvas) => {
     setCanvas(canvasInstance)
@@ -320,7 +397,24 @@ export default function EditorPage() {
     if (!canvas) return
     setIsSaving(true)
     try {
-      const canvasData = canvas.toJSON()
+      // カスタムプロパティを含めて保存
+      const canvasData = canvas.toJSON(['id', 'name', 'width', 'height', 'scaleX', 'scaleY', 'originX', 'originY'])
+      
+      // 導線データの取得と保存
+      // @ts-ignore
+      if (wireOverlayRef.current) {
+         // @ts-ignore
+         const edges = wireOverlayRef.current.getEdges()
+         // @ts-ignore
+         canvasData.connections = edges.map(edge => ({
+           id: edge.id,
+           source: edge.source,
+           sourceHandle: edge.sourceHandle,
+           target: edge.target,
+           targetHandle: edge.targetHandle
+         }))
+      }
+
       const result = await saveCanvas(canvasId, title, canvasData)
       if (result.error) {
         toast.error("保存エラー", {
@@ -467,6 +561,58 @@ export default function EditorPage() {
     }
   }
 
+  /**
+   * 現在のキャンバスの状態をテンプレート形式でコンソールに出力します
+   * 開発用機能
+   */
+  const executeExportTemplate = useCallback(() => {
+    if (!canvas || !wireOverlayRef.current) return
+
+    const objects = canvas.getObjects()
+    const edges = wireOverlayRef.current.getEdges()
+
+    const symbols = objects.map(obj => {
+      // @ts-ignore
+      const id = obj.id
+      // @ts-ignore
+      const type = obj.name || 'unknown'
+      const { left, top } = obj
+      
+      // nameプロパティが 'meter_a' のような形式か確認し、テンプレートのtypeに合わせて変換
+      let templateType = type
+      if (type === 'meter_a') templateType = 'meter_a'
+      if (type === 'meter_v') templateType = 'meter_v'
+      if (type === 'power_source') templateType = 'source'
+
+      return {
+        type: templateType,
+        x: left,
+        y: top,
+        id: id
+      }
+    }).filter(s => s.type !== 'unknown' && !s.type.startsWith('fabric-obj')) // フィルタリング
+
+    const connections = edges.map(edge => ({
+      source: edge.source,
+      sourceHandle: edge.sourceHandle?.replace(/-src$/, '').replace(/-tgt$/, ''), // ハンドルIDの整形
+      target: edge.target,
+      targetHandle: edge.targetHandle?.replace(/-src$/, '').replace(/-tgt$/, ''),
+    }))
+
+    const templateData = {
+      symbols,
+      connections
+    }
+
+    console.log("----- TEMPLATE DATA START -----")
+    console.log(JSON.stringify(templateData, null, 2))
+    console.log("----- TEMPLATE DATA END -----")
+
+    toast.success("テンプレートデータを出力しました", {
+      description: "開発者ツールのコンソールを確認してください"
+    })
+  }, [canvas])
+
   return (
     <div className="flex h-screen flex-col overflow-hidden">
       <header className="flex h-16 item-center border-b px-4 gap-2 bg-white z-10">
@@ -479,6 +625,13 @@ export default function EditorPage() {
         <h1 className="font-bold mr-4 text-lg">
           {projectTitle}
         </h1>
+        
+        {/* 開発用：テンプレート出力 */}
+        {process.env.NODE_ENV === 'development' && (
+          <Button variant="ghost" size="sm" onClick={executeExportTemplate} title="テンプレート定義をコンソールに出力">
+            Dev Info
+          </Button>
+        )}
         
         <div className="flex items-center gap-1 border-r pr-4 mr-2">
           <Button variant="outline" size="icon" onClick={addRect} title="四角形"><Square className="h-4 w-4" /></Button>

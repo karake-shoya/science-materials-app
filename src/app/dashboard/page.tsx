@@ -1,13 +1,13 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Plus, Zap, LogOut, User, FolderOpen } from 'lucide-react'
+import { Zap, LogOut, User, FolderOpen } from 'lucide-react'
 import { getUserCanvases } from '@/app/editor/actions'
 import { formatDistanceToNow } from 'date-fns'
 import { ja } from 'date-fns/locale'
 import { ProjectCard } from '@/components/dashboard/ProjectCard'
 import { signOut } from '@/app/login/actions'
 import { createClient } from '@/lib/supabase/server'
+import { CreateProjectButton } from '@/components/dashboard/CreateProjectButton'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -52,12 +52,7 @@ export default async function DashboardPage() {
             <p className="text-muted-foreground text-sm mb-1">{displayName}さん、ようこそ</p>
             <h1 className="text-2xl font-bold">プロジェクト</h1>
           </div>
-          <Link href="/editor">
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              新規作成
-            </Button>
-          </Link>
+          <CreateProjectButton />
         </div>
 
         {projects.length === 0 ? (
@@ -69,24 +64,12 @@ export default async function DashboardPage() {
             <p className="text-muted-foreground text-sm mb-6">
               新規作成ボタンから最初のプロジェクトを作成しましょう
             </p>
-            <Link href="/editor">
-              <Button variant="outline" className="gap-2">
-                <Plus className="h-4 w-4" />
-                新規作成
-              </Button>
-            </Link>
+            <CreateProjectButton variant="outline" />
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {/* 新規作成カード */}
-            <Link href="/editor">
-              <Card className="flex h-full min-h-[200px] flex-col items-center justify-center border-dashed border-2 hover:border-primary/50 hover:bg-muted/50 transition-all cursor-pointer">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
-                  <Plus className="h-6 w-6 text-primary" />
-                </div>
-                <span className="font-medium text-sm">新しい図版を作成</span>
-              </Card>
-            </Link>
+            <CreateProjectButton variant="card" />
 
             {/* プロジェクト一覧 */}
             {projects.map((project) => (
