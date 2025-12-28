@@ -12,6 +12,7 @@ const unlinkAsync = promisify(fs.unlink);
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const count = searchParams.get('count') || '5';
+  const withAnswers = searchParams.get('with_answers') === 'true';
   
   // バリデーション
   const numCount = parseInt(count);
@@ -31,8 +32,9 @@ export async function GET(request: NextRequest) {
 
   try {
     // Pythonスクリプト実行
-    // -n: 問題数, -o: 出力パス
-    await execAsync(`"${pythonPath}" "${pythonScript}" -n ${numCount} -o "${tempOutput}"`);
+    // -n: 問題数, -o: 出力パス, --with-answers: 解答の有無
+    const cmd = `"${pythonPath}" "${pythonScript}" -n ${numCount} -o "${tempOutput}"${withAnswers ? ' --with-answers' : ''}`;
+    await execAsync(cmd);
 
     // 生成されたPDFファイルを読み込み
     const data = await readFileAsync(tempOutput);

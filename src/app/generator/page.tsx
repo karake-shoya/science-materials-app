@@ -6,9 +6,11 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Loader2 } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
 
 export default function GeneratorPage() {
   const [count, setCount] = useState(5);
+  const [withAnswers, setWithAnswers] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -18,7 +20,7 @@ export default function GeneratorPage() {
     setPdfUrl(null);
     
     setTimeout(() => {
-        const url = `/api/generate-pdf?count=${count}&t=${Date.now()}`;
+        const url = `/api/generate-pdf?count=${count}&with_answers=${withAnswers}&t=${Date.now()}`;
         setPdfUrl(url);
         // 簡易実装: 生成リクエスト完了として1秒後にローディング解除
         setTimeout(() => setIsLoading(false), 1000);
@@ -49,6 +51,15 @@ export default function GeneratorPage() {
                 value={count} 
                 onChange={(e) => setCount(Number(e.target.value))}
               />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Switch 
+                id="with-answers" 
+                checked={withAnswers}
+                onCheckedChange={setWithAnswers}
+              />
+              <Label htmlFor="with-answers">解答も作成する（2ページ目）</Label>
             </div>
             
             <div className="pt-4">
