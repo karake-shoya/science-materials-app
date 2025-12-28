@@ -182,7 +182,7 @@ export default function FabricCanvas({
       }
     }
 
-    const handleMouseMove = (options: fabric.IEvent<MouseEvent>) => {
+    const handleMouseMove = (options: fabric.IEvent<Event>) => {
       if (!selectedSymbolRef.current) {
         removePreview()
         return
@@ -223,7 +223,7 @@ export default function FabricCanvas({
       canvas.renderAll()
     }
 
-    const handleMouseDown = (options: fabric.IEvent<MouseEvent>) => {
+    const handleMouseDown = (options: fabric.IEvent<Event>) => {
       if (!selectedSymbolRef.current) return
       
       // オブジェクト上でのクリックは無視
@@ -235,7 +235,7 @@ export default function FabricCanvas({
       canvas.selection = false
     }
 
-    const handleMouseUp = (options: fabric.IEvent<MouseEvent>) => {
+    const handleMouseUp = (options: fabric.IEvent<Event>) => {
       if (!selectedSymbolRef.current || !dragStartRef.current) {
         isDraggingRef.current = false
         dragStartRef.current = null
