@@ -1,13 +1,11 @@
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Zap, LogOut, User, FolderOpen } from 'lucide-react'
+import { FolderOpen } from 'lucide-react'
 import { getUserCanvases } from '@/app/editor/actions'
 import { formatDistanceToNow } from 'date-fns'
 import { ja } from 'date-fns/locale'
 import { ProjectCard } from '@/components/dashboard/ProjectCard'
-import { signOut } from '@/app/login/actions'
 import { createClient } from '@/lib/supabase/server'
 import { CreateProjectButton } from '@/components/dashboard/CreateProjectButton'
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -18,32 +16,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* ヘッダー */}
-      <header className="sticky top-0 z-50 border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="mx-auto max-w-6xl px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center">
-                <Zap className="h-4 w-4 text-primary-foreground" />
-              </div>
-              <span className="font-semibold">ScienceEditor</span>
-            </Link>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link href="/mypage">
-              <Button variant="ghost" size="sm" className="gap-2">
-                <User className="h-4 w-4" />
-                <span className="hidden sm:inline">{displayName}</span>
-              </Button>
-            </Link>
-            <form action={signOut}>
-              <Button variant="ghost" size="icon" type="submit" title="ログアウト">
-                <LogOut className="h-4 w-4" />
-              </Button>
-            </form>
-          </div>
-        </div>
-      </header>
+      <DashboardHeader />
 
       {/* メインコンテンツ */}
       <main className="mx-auto max-w-6xl px-6 py-8">
