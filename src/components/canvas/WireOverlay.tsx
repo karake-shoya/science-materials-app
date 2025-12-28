@@ -23,7 +23,15 @@ interface WireOverlayProps {
 }
 
 export interface WireOverlayHandle {
-  getEdgesForExport: () => { sourceX: number; sourceY: number; targetX: number; targetY: number }[]
+  getEdgesForExport: () => { 
+    id: string
+    sourceX: number
+    sourceY: number 
+    targetX: number
+    targetY: number
+    sourcePosition: Position
+    targetPosition: Position 
+  }[]
   addEdges: (edges: Edge[]) => void
   getEdges: () => Edge[]
   loadEdges: (edges: Edge[]) => void
@@ -142,17 +150,30 @@ const WireOverlay = forwardRef<WireOverlayHandle, WireOverlayProps>(({ fabricCan
     if (!node) return null
 
     const { x, y } = node.position
-    const { width, height } = node.data as { width: number; height: number }
+    const { width, height, angle } = node.data as { width: number; height: number; angle?: number }
+    
     const halfWidth = width / 2
     const halfHeight = height / 2
+    const safeAngle = angle || 0
 
-    // ハンドルIDから位置を計算
-    if (handleId.startsWith('top')) return { x, y: y - halfHeight }
-    if (handleId.startsWith('bottom')) return { x, y: y + halfHeight }
-    if (handleId.startsWith('left')) return { x: x - halfWidth, y }
-    if (handleId.startsWith('right')) return { x: x + halfWidth, y }
+    // ローカル座標系でのハンドル位置（中心からのオフセット）
+    let offsetX = 0
+    let offsetY = 0
 
-    return { x, y }
+    if (handleId.startsWith('top')) offsetY = -halfHeight
+    else if (handleId.startsWith('bottom')) offsetY = halfHeight
+    else if (handleId.startsWith('left')) offsetX = -halfWidth
+    else if (handleId.startsWith('right')) offsetX = halfWidth
+
+    // 回転を適用
+    const rad = (safeAngle * Math.PI) / 180
+    const cos = Math.cos(rad)
+    const sin = Math.sin(rad)
+
+    const rotatedX = offsetX * cos - offsetY * sin
+    const rotatedY = offsetX * sin + offsetY * cos
+
+    return { x: x + rotatedX, y: y + rotatedY }
   }, [nodes])
 
   // エクスポート用にエッジの座標を取得
@@ -162,11 +183,23 @@ const WireOverlay = forwardRef<WireOverlayHandle, WireOverlayProps>(({ fabricCan
         const sourcePos = getHandlePosition(edge.source, edge.sourceHandle || '')
         const targetPos = getHandlePosition(edge.target, edge.targetHandle || '')
         
+        // ハンドルIDからPositionを特定
+        const getPosFromHandleId = (handleId: string | null | undefined): Position => {
+          if (!handleId) return Position.Top
+          if (handleId.includes('bottom')) return Position.Bottom
+          if (handleId.includes('left')) return Position.Left
+          if (handleId.includes('right')) return Position.Right
+          return Position.Top
+        }
+
         return {
+          id: edge.id,
           sourceX: sourcePos?.x || 0,
           sourceY: sourcePos?.y || 0,
           targetX: targetPos?.x || 0,
           targetY: targetPos?.y || 0,
+          sourcePosition: getPosFromHandleId(edge.sourceHandle),
+          targetPosition: getPosFromHandleId(edge.targetHandle),
         }
       })
     },

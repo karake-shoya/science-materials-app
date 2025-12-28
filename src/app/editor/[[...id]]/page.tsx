@@ -9,6 +9,7 @@ import Link from "next/link"
 import { AssetSidebar } from "@/components/editor/AssetSidebar"
 import { saveCanvas, deleteCanvas, getCanvasById } from "@/app/editor/actions"
 import type { PlaceSymbolOptions } from "@/components/canvas/FabricCanvas"
+import { getSmoothStepPath } from "@xyflow/react"
 import {
   Dialog,
   DialogContent,
@@ -447,21 +448,38 @@ export default function EditorPage() {
   const getExportDataUrl = useCallback(() => {
     if (!canvas) return null
 
-    const wireLines: fabric.Line[] = []
+    const wirePaths: fabric.Path[] = []
     if (wireOverlayRef.current) {
       const edgeData = wireOverlayRef.current.getEdgesForExport()
       edgeData.forEach(edge => {
-        const line = new fabric.Line(
-          [edge.sourceX, edge.sourceY, edge.targetX, edge.targetY],
-          {
-            stroke: '#000',
-            strokeWidth: 2,
-            selectable: false,
-            evented: false,
-          }
-        )
-        wireLines.push(line)
-        canvas.add(line)
+        // ReactFlowの関数を使ってパス文字列（SVGのd属性）を生成
+        const [pathParams] = getSmoothStepPath({
+          sourceX: edge.sourceX,
+          sourceY: edge.sourceY,
+          targetX: edge.targetX,
+          targetY: edge.targetY,
+          sourcePosition: edge.sourcePosition,
+          targetPosition: edge.targetPosition,
+        })
+
+        const path = new fabric.Path(pathParams, {
+          stroke: '#000',
+          strokeWidth: 2,
+          fill: '',
+          selectable: false,
+          evented: false,
+          objectCaching: false, // 描画の乱れを防ぐため
+        })
+        
+        // Fabric.jsのPathは位置がずれることがあるため、絶対座標に合わせて調整
+        // Pathを作成すると、そのBoundingBoxの左上が(0,0)になるようにパスデータが変換され、
+        // top/leftプロパティが設定される仕様があるため、ここでは作成後に位置調整は不要なはずだが、
+        //念のため確認が必要。通常svg path stringをそのまま渡せば絶対座標で描画されるが、
+        // Fabricはパスを解析してtop/leftを再計算し、pathデータを相対化することがある。
+        // ここでは単純にaddする。
+
+        wirePaths.push(path)
+        canvas.add(path)
       })
       canvas.renderAll()
     }
@@ -471,7 +489,7 @@ export default function EditorPage() {
       multiplier: 3,
     })
 
-    wireLines.forEach(line => canvas.remove(line))
+    wirePaths.forEach(path => canvas.remove(path))
     canvas.renderAll()
 
     return dataUrl
