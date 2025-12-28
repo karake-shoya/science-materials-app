@@ -5,6 +5,12 @@ import { toast } from "sonner"
 const MAX_HISTORY = 50
 const DEBOUNCE_DELAY = 200
 
+/**
+ * キャンバスの履歴管理（Undo/Redo）を行うフック
+ * 
+ * @param canvas - Fabric.jsのCanvasインスタンス
+ * @returns 履歴操作用関数と状態refsを含むオブジェクト
+ */
 export const useCanvasHistory = (canvas: fabric.Canvas | null) => {
   const historyRef = useRef<string[]>([])
   const historyIndexRef = useRef(-1)

@@ -2,6 +2,13 @@ import { useEffect, useRef } from "react"
 import { fabric } from "fabric"
 import { GRID_SIZE } from "../constants"
 
+/**
+ * キャンバスのグリッドスナップ機能を管理するフック
+ * オブジェクトの移動、回転、拡大縮小時にグリッドに合わせてスナップさせます
+ * 
+ * @param canvas - Fabric.jsのCanvasインスタンス
+ * @param isGridEnabled - グリッドスナップが有効かどうか
+ */
 export const useCanvasGrid = (canvas: fabric.Canvas | null, isGridEnabled: boolean) => {
   const isGridEnabledRef = useRef(isGridEnabled)
   

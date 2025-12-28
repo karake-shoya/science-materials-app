@@ -9,6 +9,15 @@ type ConnectionPoint = {
   object: fabric.Object
 }
 
+/**
+ * キャンバス上の導線接続ロジックを管理するフック
+ * スナップ機能、接続ポイントの検出、導線の描画を行います
+ * 
+ * @param canvas - Fabric.jsのCanvasインスタンス
+ * @param selectedSymbol - 現在選択されているシンボルID（配置モード用）
+ * @param saveHistory - 履歴保存用の関数
+ * @returns 導線リセット関数と接続ポイント取得関数
+ */
 export const useCanvasConnection = (
     canvas: fabric.Canvas | null,
     selectedSymbol: string | null,
@@ -23,7 +32,12 @@ export const useCanvasConnection = (
       selectedSymbolRef.current = selectedSymbol
   }, [selectedSymbol])
 
-  // 図形の上下左右中心の接続ポイントを取得
+  /**
+   * 図形の上下左右中心の接続ポイントを取得します
+   * 
+   * @param obj - 対象のFabricオブジェクト
+   * @returns 接続ポイントの配列
+   */
   const getConnectionPoints = (obj: fabric.Object): ConnectionPoint[] => {
     const bound = obj.getBoundingRect()
     const centerX = bound.left + bound.width / 2
@@ -37,7 +51,15 @@ export const useCanvasConnection = (
     ]
   }
 
-  // 最も近い接続ポイントを検出
+  /**
+   * 指定座標に最も近い接続ポイントを検出します
+   * 
+   * @param x - 検索中心のX座標
+   * @param y - 検索中心のY座標
+   * @param canvasInstance - 検索対象のCanvasインスタンス
+   * @param excludeObject - 検索から除外するオブジェクト（自分自身への接続防止）
+   * @returns 最も近い接続ポイント、またはnull
+   */
   const findNearestConnectionPoint = useCallback((
     x: number,
     y: number,
@@ -65,7 +87,14 @@ export const useCanvasConnection = (
     return nearest
   }, [])
 
-  // 自動折れ曲がりの中間点を計算
+  /**
+   * 導線の自動折れ曲がり（マンハッタン配線）のためのパス座標を計算します
+   * 
+   * @param start - 始点の接続ポイント
+   * @param endX - 終点のX座標
+   * @param endY - 終点のY座標
+   * @returns 導線の通過ポイントの配列
+   */
   const calculateWirePoints = useCallback((start: ConnectionPoint, endX: number, endY: number): {x: number, y: number}[] => {
     const points: {x: number, y: number}[] = [{ x: start.x, y: start.y }]
     

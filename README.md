@@ -1,8 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 理科教材作成アプリ (Science Materials App)
 
-## Getting Started
+このアプリケーションは、学校の先生や生徒が電気回路図などの理科教材を直感的に作成できるように設計されたWebアプリケーションです。
+Next.jsとFabric.jsを使用して構築されており、ブラウザ上で手軽に図を作成・保存・印刷することができます。
 
-First, run the development server:
+## 主な機能
+
+- **電気回路図の作成**
+  - 日本の理科教育で標準的な記号（豆電球、抵抗、電源、スイッチ、電流計・電圧計など）を用意
+  - ドラッグ＆ドロップで簡単に配置
+- **インテリジェントな導線描画**
+  - 記号同士を自動的に直角に配線（マンハッタン配線）
+  - 接続ポイントへのスナップ機能で、きれいに接続
+- **編集機能**
+  - 元に戻す (Undo) / やり直す (Redo)
+  - コピー＆ペースト、複製
+  - 複数選択、削除、移動
+- **プロジェクト管理**
+  - 作成した図の保存と読み込み
+  - タイトル設定
+- **出力機能**
+  - 画像として保存 (PNG)
+  - 印刷用PDFとして保存 (A4, B4対応)
+
+## 技術スタック
+
+- **Framework**: [Next.js](https://nextjs.org/) (App Router)
+- **Language**: TypeScript
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **UI Components**: [shadcn/ui](https://ui.shadcn.com/)
+- **Canvas Library**: [Fabric.js](http://fabricjs.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Database**: Supabase (PostgreSQL)
+
+## ディレクトリ構造
+
+主なディレクトリ構造は以下の通りです。
+
+```
+src/
+├── app/                 # Next.js App Routerのエントリーポイント
+│   ├── editor/          # エディタ画面と関連ロジック
+│   └── ...
+├── components/          # Reactコンポーネント
+│   ├── canvas/          # キャンバス関連のコンポーネント (FabricCanvas, WireOverlayなど)
+│   ├── editor/          # エディタUIコンポーネント (サイドバーなど)
+│   └── ui/              # 汎用UIコンポーネント (shadcn/uiなど)
+├── lib/                 # ユーティリティとコアロジック
+│   ├── canvas/          # キャンバス操作のコアロジック
+│   │   ├── hooks/       # React Custom Hooks (履歴、接続、イベント処理など)
+│   │   └── ...
+│   └── ...
+└── ...
+```
+
+## 開発の始め方
+
+### 前提条件
+
+- Node.js (v18以上推奨)
+- npm, yarn, pnpm, または bun
+
+### インストール
+
+依存関係をインストールします。
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+### 開発サーバーの起動
 
 ```bash
 npm run dev
@@ -10,27 +80,6 @@ npm run dev
 yarn dev
 # or
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+ブラウザで [http://localhost:3000](http://localhost:3000) を開くと、アプリケーションが表示されます。

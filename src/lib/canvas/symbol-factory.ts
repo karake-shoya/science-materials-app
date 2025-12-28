@@ -10,7 +10,10 @@ let idCounter = 0
 const generateId = (prefix: string) => `${prefix}-${Date.now()}-${++idCounter}`
 
 /**
- * 豆電球 (〇の中に×)
+ * 豆電球のシンボルを作成します (〇の中に×)
+ * 
+ * @param options - Fabric.jsのオブジェクトオプション
+ * @returns 作成された豆電球のGroupオブジェクト
  */
 export const createLamp = (options: fabric.IObjectOptions) => {
   const circle = new fabric.Circle({
@@ -48,7 +51,10 @@ export const createLamp = (options: fabric.IObjectOptions) => {
 }
 
 /**
- * 抵抗 (新JIS規格: 長方形)
+ * 抵抗のシンボルを作成します (新JIS規格: 長方形)
+ * 
+ * @param options - Fabric.jsのオブジェクトオプション
+ * @returns 作成された抵抗のGroupオブジェクト
  */
 export const createResistor = (options: fabric.IObjectOptions) => {
   const rect = new fabric.Rect({
@@ -73,7 +79,10 @@ export const createResistor = (options: fabric.IObjectOptions) => {
 }
 
 /**
- * 電源 (長い線が＋、短い太い線がー)
+ * 電源のシンボルを作成します (長い線が＋、短い太い線がー)
+ * 
+ * @param options - Fabric.jsのオブジェクトオプション
+ * @returns 作成された電源のGroupオブジェクト
  */
 export const createPowerSource = (options: fabric.IObjectOptions) => {
   const plusLine = new fabric.Line([0, -20, 0, 20], {
@@ -104,7 +113,11 @@ export const createPowerSource = (options: fabric.IObjectOptions) => {
 }
 
 /**
- * 検流計・電流計・電圧計 (〇の中に文字)
+ * 計器（検流計・電流計・電圧計）のシンボルを作成します (〇の中に文字)
+ * 
+ * @param label - 計器のラベル ('A': 電流計, 'V': 電圧計, 'G': 検流計)
+ * @param options - Fabric.jsのオブジェクトオプション
+ * @returns 作成された計器のGroupオブジェクト
  */
 export const createMeter = (label: 'A' | 'V' | 'G', options: fabric.IObjectOptions) => {
   const circle = new fabric.Circle({
@@ -136,7 +149,10 @@ export const createMeter = (label: 'A' | 'V' | 'G', options: fabric.IObjectOptio
 }
 
 /**
- * スイッチ (開いた状態)
+ * スイッチのシンボルを作成します (開いた状態)
+ * 
+ * @param options - Fabric.jsのオブジェクトオプション
+ * @returns 作成されたスイッチのGroupオブジェクト
  */
 export const createSwitch = (options: fabric.IObjectOptions) => {
   const dot1 = new fabric.Circle({ radius: 3, fill: 'black', left: -20, top: 0, originX: 'center', originY: 'center' })

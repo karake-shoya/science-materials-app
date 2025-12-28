@@ -51,6 +51,10 @@ const WireOverlay = dynamic(() => import("@/components/canvas/WireOverlay"), {
 
 import type { WireOverlayHandle } from "@/components/canvas/WireOverlay"
 
+/**
+ * 理科教材作成エディタのメインページコンポーネント
+ * キャンバス操作、シンボル配置、保存/読み込み、エクスポート機能を提供します
+ */
 export default function EditorPage() {
   const params = useParams()
   const router = useRouter()
@@ -165,6 +169,9 @@ export default function EditorPage() {
     saveHistory()
   }, [canvas, saveHistory])
 
+  /**
+   * 円を追加するヘルパー関数
+   */
   const addCircle = useCallback(() => {
     if (!canvas) return
     const circle = new fabric.Circle({
@@ -201,6 +208,12 @@ export default function EditorPage() {
     saveHistory()
   }, [canvas, saveHistory])
 
+  /**
+   * サイドバーからシンボルがドロップされた時のハンドラ
+   * 
+   * @param e - ドラッグイベント
+   * @param canvas - キャンバスインスタンス
+   */
   const handleCanvasDrop = useCallback((e: DragEvent<HTMLDivElement>, canvas: fabric.Canvas) => {
     if (!canvas) return
 
@@ -239,6 +252,11 @@ export default function EditorPage() {
     }
   }, [saveHistory])
 
+  /**
+   * シンボル配置モードでの配置ハンドラ
+   * 
+   * @param options - 配置オプション (シンボルID、座標、幅など)
+   */
   const handlePlaceSymbol = useCallback((options: PlaceSymbolOptions) => {
     if (!canvas) return
 
@@ -293,6 +311,11 @@ export default function EditorPage() {
     }
   }
 
+  /**
+   * プロジェクト保存の実行
+   * 
+   * @param title - プロジェクトタイトル
+   */
   const executeSave = async (title: string) => {
     if (!canvas) return
     setIsSaving(true)
@@ -321,6 +344,12 @@ export default function EditorPage() {
     }
   }
 
+  /**
+   * エクスポート用の画像データURLを生成
+   * WireOverlayの描画内容を一時的にFabricキャンバスに追加して画像化します
+   * 
+   * @returns 画像データURL (PNG)
+   */
   const getExportDataUrl = useCallback(() => {
     if (!canvas) return null
 
@@ -354,6 +383,11 @@ export default function EditorPage() {
     return dataUrl
   }, [canvas])
 
+  /**
+   * キャンバスをPDFとしてエクスポート
+   * 
+   * @param format - 用紙サイズ ('a4' | 'b4')
+   */
   const exportToPDF = useCallback((format: "a4" | "b4" = "a4") => {
     if (!canvas) return
     toast.info("PDFを生成中...", { description: "高画質で処理しています。"})
@@ -390,6 +424,9 @@ export default function EditorPage() {
     toast.success("PDFを出力しました")
   }, [canvas, projectTitle, getExportDataUrl])
 
+  /**
+   * キャンバスを画像としてエクスポート (PNG)
+   */
   const exportToImage = useCallback(() => {
     if (!canvas) return
 

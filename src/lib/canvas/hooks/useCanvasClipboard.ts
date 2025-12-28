@@ -2,6 +2,12 @@ import { useCallback, useRef, useState, useEffect } from "react"
 import { fabric } from "fabric"
 import { toast } from "sonner"
 
+/**
+ * クリップボード機能（コピー＆ペースト）を管理するフック
+ * 
+ * @param canvas - Fabric.jsのCanvasインスタンス
+ * @returns コピー関数とペースト関数
+ */
 export const useCanvasClipboard = (canvas: fabric.Canvas | null) => {
   const clipboardRef = useRef<fabric.Object | null>(null)
 

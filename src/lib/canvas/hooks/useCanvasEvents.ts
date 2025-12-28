@@ -10,6 +10,13 @@ type KeyHandler = {
   resetWireDrawing: () => void
 }
 
+/**
+ * キャンバスのキーボードイベント（ショートカットキー）を管理するフック
+ * 削除、コピー＆ペースト、Undo/Redoなどのキー操作を処理します
+ * 
+ * @param canvas - Fabric.jsのCanvasインスタンス
+ * @param handlers - 各アクションに対応するハンドラー関数群
+ */
 export const useCanvasEvents = (
   canvas: fabric.Canvas | null,
   handlers: KeyHandler
