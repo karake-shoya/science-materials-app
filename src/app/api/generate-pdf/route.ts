@@ -5,7 +5,7 @@ import path from 'path';
 
 // フォント設定（別のフォントを使いたい場合はここを変更してください）
 const FONT_NAME = 'CustomFont';
-const FONT_FILENAME = 'ArialUnicode.ttf'; // public/fonts/ 配下のファイル名
+const FONT_FILENAME = 'ArialUnicode.ttf'; // generator/fonts/ 配下のファイル名
 
 // 問題データの型定義
 interface QuestionData {
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
     });
 
     // 日本語フォントの読み込みと登録
-    const fontPath = path.join(process.cwd(), 'public', 'fonts', FONT_FILENAME);
+    const fontPath = path.join(process.cwd(), 'generator', 'fonts', FONT_FILENAME);
     
     if (fs.existsSync(fontPath)) {
       const fontData = fs.readFileSync(fontPath).toString('base64');
@@ -90,9 +90,10 @@ export async function GET(request: NextRequest) {
       doc.setFont(FONT_NAME);
     } else {
       // 本番環境でフォントが見つからない場合は、エラーを投げて詳細を表示させる
-      const filesInFonts = fs.existsSync(path.join(process.cwd(), 'public', 'fonts')) 
-        ? fs.readdirSync(path.join(process.cwd(), 'public', 'fonts')).join(', ')
-        : 'fonts directory not found';
+      const fontsDir = path.join(process.cwd(), 'generator', 'fonts');
+      const filesInFonts = fs.existsSync(fontsDir) 
+        ? fs.readdirSync(fontsDir).join(', ')
+        : 'generator/fonts directory not found';
         
       throw new Error(`Font file not found at ${fontPath}. Available files in fonts dir: ${filesInFonts}`);
     }
