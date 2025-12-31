@@ -9,7 +9,7 @@ import { Loader2 } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
 
 export function GeneratorClient() {
-  const [count, setCount] = useState(5);
+  const [count, setCount] = useState<number | string>(5);
   const [withAnswers, setWithAnswers] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -19,8 +19,11 @@ export function GeneratorClient() {
     // iframeのロード開始をリセットするためにURLを一旦クリア
     setPdfUrl(null);
     
+    // 生成時には数値を強制（空の場合は5にするなどのフォールバック）
+    const numCount = typeof count === 'string' ? (parseInt(count) || 5) : count;
+    
     setTimeout(() => {
-        const url = `/api/generate-pdf?count=${count}&with_answers=${withAnswers}&t=${Date.now()}`;
+        const url = `/api/generate-pdf?count=${numCount}&with_answers=${withAnswers}&t=${Date.now()}`;
         setPdfUrl(url);
         // 簡易実装: 生成リクエスト完了として1秒後にローディング解除
         setTimeout(() => setIsLoading(false), 1000);
@@ -42,14 +45,17 @@ export function GeneratorClient() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="count">問題数 (1-20)</Label>
+              <Label htmlFor="count">問題数 (1-50)</Label>
               <Input 
                 id="count" 
                 type="number" 
                 min={1} 
-                max={20} 
+                max={50} 
                 value={count} 
-                onChange={(e) => setCount(Number(e.target.value))}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setCount(val === "" ? "" : parseInt(val));
+                }}
               />
             </div>
 
