@@ -122,7 +122,7 @@ export async function GET(request: NextRequest) {
       doc.text("年      組      番   氏名: ____________________", 130, 45);
 
       // 問題の配置
-      doc.setFontSize(12);
+      doc.setFontSize(11);
       const startY = 70;
       const lineHeight = 20; // 1ページ10問なので、20mm間隔で固定
 
