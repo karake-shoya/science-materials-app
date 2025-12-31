@@ -34,7 +34,7 @@ export function GeneratorClient() {
     <div className="container mx-auto py-8 px-4 h-[calc(100vh-3.5rem)] flex flex-col">
       <div className="mb-6">
         <h1 className="text-3xl font-bold">教材生成ツール</h1>
-        <p className="text-gray-500">Pythonスクリプトを使用して問題プリントを自動生成します。</p>
+        <p className="text-gray-500">問題プリントを自動生成します。</p>
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
@@ -86,7 +86,7 @@ export function GeneratorClient() {
             </div>
 
             <div className="text-sm text-gray-500 mt-4">
-                <p>※ 生成処理はサーバー上のPython環境で行われます。</p>
+                <p>※ 生成処理はサーバー上で行われます。</p>
                 <p>※ 現在は「中2理科 オームの法則」に対応しています。</p>
             </div>
           </CardContent>
