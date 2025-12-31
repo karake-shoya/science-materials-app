@@ -108,7 +108,8 @@ export async function GET(request: NextRequest) {
     }
 
     // 描画関数
-    const drawPage = (title: string, isAnswerKey: boolean) => {
+    const QUESTIONS_PER_PAGE = 10;
+    const drawPage = (title: string, pageQuestions: QuestionData[], isAnswerKey: boolean) => {
       const width = 210; // A4 width in mm
       const height = 297; // A4 height in mm
       
@@ -123,36 +124,55 @@ export async function GET(request: NextRequest) {
       // 問題の配置
       doc.setFontSize(12);
       const startY = 70;
-      let lineHeight = 45;
-      if (numCount > 5) {
-        lineHeight = (startY - 20) / numCount; // 簡易計算
-        if (lineHeight < 15) lineHeight = 15;
-      }
+      const lineHeight = 20; // 1ページ10問なので、20mm間隔で固定
 
-      questionsList.forEach((q, idx) => {
+      pageQuestions.forEach((q, idx) => {
         const currentY = startY + idx * lineHeight;
+        
+        // 問題文 (1行目と2行目)
         doc.text(q.text1, 20, currentY);
-        doc.text(q.text2, 30, currentY + 8);
+        doc.text(q.text2, 30, currentY + 7);
 
-        // 解答欄
-        doc.rect(140, currentY - 5, 40, 12);
+        // 解答欄の四角
+        const boxX = 150;
+        const boxY = currentY - 3;
+        const boxW = 45;
+        const boxH = 12;
+        doc.rect(boxX, boxY, boxW, boxH);
 
         if (isAnswerKey) {
+          doc.saveGraphicsState();
           doc.setTextColor(255, 0, 0); // 赤色
-          const text = `${q.answer} ${q.unit}`;
-          doc.text(text, 160, currentY + 3, { align: 'center' });
-          doc.setTextColor(0, 0, 0); // 黒に戻す
+          doc.setFontSize(14);
+          
+          const answerText = `${q.answer} ${q.unit}`;
+          // 四角の中央に配置
+          doc.text(answerText, boxX + boxW / 2, boxY + boxH / 2 + 4, { align: 'center' });
+          doc.restoreGraphicsState();
         }
       });
     };
 
-    // 1ページ目：問題
-    drawPage("中2理科 オームの法則 練習問題", false);
+    // ページ分割して描画（問題）
+    for (let i = 0; i < questionsList.length; i += QUESTIONS_PER_PAGE) {
+      if (i > 0) doc.addPage();
+      const chunk = questionsList.slice(i, i + QUESTIONS_PER_PAGE);
+      const pageTitle = questionsList.length > QUESTIONS_PER_PAGE 
+        ? `中2理科 オームの法則 練習問題 (${i + 1}〜${Math.min(i + QUESTIONS_PER_PAGE, questionsList.length)}問)`
+        : "中2理科 オームの法則 練習問題";
+      drawPage(pageTitle, chunk, false);
+    }
 
-    // 2ページ目：解答（必要な場合）
+    // ページ分割して描画（解答編）
     if (withAnswers) {
-      doc.addPage();
-      drawPage("中2理科 オームの法則 練習問題 (解答)", true);
+      for (let i = 0; i < questionsList.length; i += QUESTIONS_PER_PAGE) {
+        doc.addPage();
+        const chunk = questionsList.slice(i, i + QUESTIONS_PER_PAGE);
+        const pageTitle = questionsList.length > QUESTIONS_PER_PAGE 
+          ? `中2理科 オームの法則 練習問題 (解答) (${i + 1}〜${Math.min(i + QUESTIONS_PER_PAGE, questionsList.length)}問)`
+          : "中2理科 オームの法則 練習問題 (解答)";
+        drawPage(pageTitle, chunk, true);
+      }
     }
 
     // PDFをArrayBufferとして取得
