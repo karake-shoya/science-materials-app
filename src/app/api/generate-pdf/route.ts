@@ -81,7 +81,8 @@ export async function GET(request: NextRequest) {
     });
 
     // 日本語フォントの読み込みと登録
-    const fontPath = path.join(process.cwd(), 'generator', 'fonts', FONT_FILENAME);
+    // Vercelの本番環境でファイルを確実に同梱させるため、src/lib/fonts を参照します
+    const fontPath = path.join(process.cwd(), 'src', 'lib', 'fonts', FONT_FILENAME);
     
     if (fs.existsSync(fontPath)) {
       const fontData = fs.readFileSync(fontPath).toString('base64');
@@ -89,13 +90,21 @@ export async function GET(request: NextRequest) {
       doc.addFont(FONT_FILENAME, FONT_NAME, 'normal');
       doc.setFont(FONT_NAME);
     } else {
-      // 本番環境でフォントが見つからない場合は、エラーを投げて詳細を表示させる
-      const fontsDir = path.join(process.cwd(), 'generator', 'fonts');
-      const filesInFonts = fs.existsSync(fontsDir) 
-        ? fs.readdirSync(fontsDir).join(', ')
-        : 'generator/fonts directory not found';
-        
-      throw new Error(`Font file not found at ${fontPath}. Available files in fonts dir: ${filesInFonts}`);
+      // 本番環境でのデバッグ用：さらに別の候補パス（プロジェクトルート直下など）も探す
+      const rootFontPath = path.join(process.cwd(), 'generator', 'fonts', FONT_FILENAME);
+      if (fs.existsSync(rootFontPath)) {
+          const fontData = fs.readFileSync(rootFontPath).toString('base64');
+          doc.addFileToVFS(FONT_FILENAME, fontData);
+          doc.addFont(FONT_FILENAME, FONT_NAME, 'normal');
+          doc.setFont(FONT_NAME);
+      } else {
+          const srcDir = path.join(process.cwd(), 'src', 'lib', 'fonts');
+          const filesInSrcFonts = fs.existsSync(srcDir) 
+            ? fs.readdirSync(srcDir).join(', ')
+            : 'src/lib/fonts directory not found';
+            
+          throw new Error(`Font file not found. Checked: ${fontPath} and ${rootFontPath}. Files in src/lib/fonts: ${filesInSrcFonts}`);
+      }
     }
 
     // 描画関数
