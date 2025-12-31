@@ -27,8 +27,21 @@ export async function GET(request: NextRequest) {
   // スクリプトパスとPythonパスの解決
   const pythonScript = path.join(process.cwd(), 'generator/ohm_law.py');
   
-  // プロジェクトルートの.venvを使用
-  const pythonPath = path.join(process.cwd(), '.venv/bin/python');
+  // Pythonパスの解決
+  // 1. 環境変数 PYTHON_PATH があればそれを使用
+  // 2. ローカルの .venv/bin/python があればそれを使用
+  // 3. なければシステムパスの python3 または python を使用
+  let pythonPath = process.env.PYTHON_PATH;
+
+  if (!pythonPath) {
+    const localVenvPath = path.join(process.cwd(), '.venv/bin/python');
+    if (fs.existsSync(localVenvPath)) {
+      pythonPath = localVenvPath;
+    } else {
+      // 本番環境（Vercelなど）や.venvがない環境ではシステムパスのpython3をデフォルトに
+      pythonPath = 'python3';
+    }
+  }
 
   try {
     // Pythonスクリプト実行
