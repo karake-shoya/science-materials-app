@@ -5,6 +5,7 @@ export class HumidityGenerator implements ProblemGenerator {
 
   // 気温と飽和水蒸気量のデータ (簡略化)
   private saturationTable: { [key: number]: number } = {
+    0: 4.8,
     5: 6.8,
     10: 9.4,
     15: 12.8,
@@ -37,9 +38,9 @@ export class HumidityGenerator implements ProblemGenerator {
         const tableElement: QuestionElement = {
           type: 'table',
           data: {
-            headers: ['気温 [℃]', '5', '10', '15', '20', '25', '30'],
+            headers: ['気温 [℃]', '0', '5', '10', '15', '20', '25', '30'],
             rows: [
-              ['飽和水蒸気量 [g/m³]', '6.8', '9.4', '12.8', '17.3', '23.1', '30.4']
+              ['飽和水蒸気量 [g/m³]', '4.8', '6.8', '9.4', '12.8', '17.3', '23.1', '30.4']
             ]
           }
         };
@@ -109,9 +110,9 @@ export class HumidityGenerator implements ProblemGenerator {
         elements = [{
           type: 'table',
           data: {
-            headers: ['気温 [℃]', '5', '10', '15', '20', '25', '30'],
+            headers: ['気温 [℃]', '0', '5', '10', '15', '20', '25', '30'],
             rows: [
-              ['飽和水蒸気量 [g/m³]', '6.8', '9.4', '12.8', '17.3', '23.1', '30.4']
+              ['飽和水蒸気量 [g/m³]', '4.8', '6.8', '9.4', '12.8', '17.3', '23.1', '30.4']
             ]
           }
         }];
