@@ -196,6 +196,45 @@ export async function GET(request: NextRequest) {
           doc.circle(px, py, 0.5, 'F');
         });
       }
+
+      // アノテーションと補助線
+      if (data.annotations && data.annotations.length > 0) {
+        data.annotations.forEach((ann: any) => {
+          const px = x + (ann.x - xAxis.min) / (xAxis.max - xAxis.min) * w;
+          const py = y + h - (ann.y - yAxis.min) / (yAxis.max - yAxis.min) * h;
+
+          if (ann.showLines) {
+            doc.saveGraphicsState();
+            doc.setLineWidth(0.3);
+            doc.setLineDashPattern([1, 1], 0); // 点線
+            doc.setDrawColor(100, 100, 100);
+            doc.line(px, py, px, y + h); // 下（X軸）へ
+            doc.line(x, py, px, py); // 左（Y軸）へ
+            doc.restoreGraphicsState();
+          }
+
+          if (ann.label) {
+            doc.setFontSize(7);
+            doc.setTextColor(50, 50, 50);
+            
+            let labelY = py + 1;
+            // Y軸の目盛り数値(5刻み)との重複チェック
+            const nearestStepValue = Math.round(ann.y / yAxis.step) * yAxis.step;
+            const nearestStepPy = y + h - (nearestStepValue - yAxis.min) / (yAxis.max - yAxis.min) * h;
+            
+            // 垂直距離が3mm未満なら上にずらす
+            if (Math.abs(py - nearestStepPy) < 2) {
+              labelY = py - 1; 
+            }
+            
+            doc.text(ann.label, x - 2, labelY, { align: 'right' });
+            doc.setTextColor(0, 0, 0); // リセット
+          }
+          
+          doc.setDrawColor(0, 0, 0);
+          doc.circle(px, py, 0.8, 'F');
+        });
+      }
     };
 
     // 表描画ヘルパー

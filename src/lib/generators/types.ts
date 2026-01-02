@@ -1,10 +1,18 @@
 export type GeneratorFormat = 'basic' | 'graphical' | 'comprehensive' | 'comprehensive_table' | 'comprehensive_graph';
 
+export interface GraphAnnotation {
+  x: number;
+  y: number;
+  label?: string;
+  showLines?: boolean; // 軸への補助線を表示するかどうか
+}
+
 export interface GraphData {
   type: 'line' | 'scatter';
   xAxis: { label: string; min: number; max: number; step: number; unit?: string };
   yAxis: { label: string; min: number; max: number; step: number; unit?: string };
   points: { x: number; y: number }[];
+  annotations?: GraphAnnotation[];
 }
 
 export interface TableData {

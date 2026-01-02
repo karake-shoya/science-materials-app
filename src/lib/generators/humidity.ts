@@ -53,7 +53,15 @@ export class HumidityGenerator implements ProblemGenerator {
             yAxis: { label: '水蒸気量', min: 0, max: 35, step: 5, unit: 'g/m³' },
             points: Object.entries(this.saturationTable)
               .map(([t, v]) => ({ x: Number(t), y: v }))
-              .sort((a, b) => a.x - b.x)
+              .sort((a, b) => a.x - b.x),
+            annotations: [
+              {
+                x: temp,
+                y: satVal,
+                label: `${satVal}`,
+                showLines: true
+              }
+            ]
           }
         };
 
