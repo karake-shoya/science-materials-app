@@ -19,8 +19,7 @@ export class HumidityGenerator implements ProblemGenerator {
 
     for (let i = 1; i <= count; i++) {
       const qType = Math.floor(Math.random() * 2) + 1; // 1:湿度, 2:水蒸気量
-      let qText1 = '';
-      let qText2 = '';
+      let qText = '';
       let ans = '';
       let unit = '';
 
@@ -31,23 +30,20 @@ export class HumidityGenerator implements ProblemGenerator {
         // 湿度 = (実際 / 飽和) * 100
         const actual = Math.round((satVal * (0.3 + Math.random() * 0.6)) * 10) / 10;
         const humidity = (actual / satVal) * 100;
-        qText1 = `問${i}. 気温が ${temp}℃ で、空気 1m³ 中に含まれる水蒸気量が ${actual}g の空気があります。`;
-        qText2 = `このときの湿度は何%ですか。小数第1位を四捨五入して答えなさい。(${temp}℃の飽和水蒸気量を ${satVal}g/m³ とする)`;
+        qText = `問${i}. 気温が ${temp}℃ で、空気 1m³ 中に含まれる水蒸気量が ${actual}g の空気があります。このときの湿度は何%ですか。小数第1位を四捨五入して答えなさい。(${temp}℃の飽和水蒸気量を ${satVal}g/m³ とする)`;
         ans = Math.round(humidity).toString();
         unit = "%";
       } else {
         // 水蒸気量 = 飽和 * 湿度 / 100
         const humidity = [40, 50, 60, 80][Math.floor(Math.random() * 4)];
         const actual = (satVal * humidity) / 100;
-        qText1 = `問${i}. 気温が ${temp}℃ で、湿度が ${humidity}% の空気があります。`;
-        qText2 = `この空気 1m³ 中に含まれる水蒸気量は何gですか。小数第2位を四捨五入して答えなさい。(${temp}℃の飽和水蒸気量を ${satVal}g/m³ とする)`;
+        qText = `問${i}. 気温が ${temp}℃ で、湿度が ${humidity}% の空気があります。この空気 1m³ 中に含まれる水蒸気量は何gですか。小数第2位を四捨五入して答えなさい。(${temp}℃の飽和水蒸気量を ${satVal}g/m³ とする)`;
         ans = actual.toFixed(1);
         unit = "g";
       }
 
       questionsList.push({
-        text1: qText1,
-        text2: qText2,
+        text: qText,
         answer: ans,
         unit: unit
       });

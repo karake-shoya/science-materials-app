@@ -70,28 +70,20 @@ export async function GET(request: NextRequest) {
       pageQuestions.forEach((q, idx) => {
         const currentY = startY + idx * lineHeight;
         const indentX = 32; // 本文の開始x座標 (インデント位置)
-        const textMaxWidth = 140; // 折り返し幅を広げて最適化
-        const contentWidth = textMaxWidth - (indentX - 20); // 番号分を引いた本文の有効幅
+        const textMaxWidth = 140; // 折り返し幅
+        const contentWidth = textMaxWidth - (indentX - 20); // 本文の有効幅
         
-        // 「問x. 」の部分と本文を分離（プロフェッショナルな正規表現処理）
-        const prefixMatch = q.text1.match(/^問\d+\.\s*/);
+        // 「問x. 」の部分と本文を分離
+        const prefixMatch = q.text.match(/^問\d+\.\s*/);
         const prefix = prefixMatch ? prefixMatch[0] : "";
-        const mainText1 = q.text1.replace(prefix, "");
+        const mainText = q.text.replace(prefix, "");
 
         // 1. 番号 (問x.) を描画
         doc.text(prefix, 20, currentY);
 
-        // 2. 本文1行目以降 (インデント位置から開始)
-        const lines1 = doc.splitTextToSize(mainText1, contentWidth);
-        doc.text(lines1, indentX, currentY);
-        
-        // 本文1の行数から本文2の開始位置を計算
-        const lineSpacing = 5;
-        const text1Height = lines1.length * lineSpacing;
-        
-        // 3. 本文2を描画 (同じインデント位置から)
-        const lines2 = doc.splitTextToSize(q.text2, contentWidth);
-        doc.text(lines2, indentX, currentY + text1Height);
+        // 2. 本文を分割して描画 (インデント位置から開始)
+        const lines = doc.splitTextToSize(mainText, contentWidth);
+        doc.text(lines, indentX, currentY);
 
         // 解答欄の四角
         const boxX = 160;

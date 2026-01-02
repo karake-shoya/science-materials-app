@@ -1,6 +1,5 @@
 export interface QuestionData {
-  text1: string;
-  text2: string;
+  text: string;
   answer: string;
   unit: string;
 }
