@@ -55,8 +55,9 @@ export async function GET(request: NextRequest) {
     }
 
     // 描画設定（形式に応じて動的に変更）
-    const QUESTIONS_PER_PAGE = format === 'comprehensive' ? 1 : format === 'graphical' ? 3 : 10;
-    const lineHeight = format === 'comprehensive' ? 0 : format === 'graphical' ? 65 : 20;
+    const isComprehensive = format.startsWith('comprehensive');
+    const QUESTIONS_PER_PAGE = isComprehensive ? 1 : format === 'graphical' ? 3 : 10;
+    const lineHeight = isComprehensive ? 0 : format === 'graphical' ? 65 : 20;
 
     const drawPage = (title: string, pageQuestions: QuestionData[], isAnswerKey: boolean) => {
       const width = 210;
@@ -70,7 +71,7 @@ export async function GET(request: NextRequest) {
       const startY = 70;
 
       pageQuestions.forEach((q, idx) => {
-        const currentY = format === 'comprehensive' ? startY : startY + idx * lineHeight;
+        const currentY = isComprehensive ? startY : startY + idx * lineHeight;
         doc.setFontSize(11);
         const indentX = 32;
         const textMaxWidth = 125;

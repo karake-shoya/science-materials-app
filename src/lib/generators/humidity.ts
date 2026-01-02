@@ -17,8 +17,9 @@ export class HumidityGenerator implements ProblemGenerator {
     const questionsList: QuestionData[] = [];
     const tempsArr = Object.keys(this.saturationTable).map(Number);
 
-    if (format === 'comprehensive') {
+    if (format === 'comprehensive' || format === 'comprehensive_table' || format === 'comprehensive_graph') {
       // 総合問題（大問）モード
+      const isGraph = format === 'comprehensive_graph';
       for (let i = 1; i <= count; i++) {
         // 設定値の決定
         const temp = [20, 25, 30][Math.floor(Math.random() * 3)]; // 比較的高めの気温
@@ -33,19 +34,33 @@ export class HumidityGenerator implements ProblemGenerator {
         const lowSatVal = this.saturationTable[lowTemp];
         const droplets = actual - lowSatVal;
 
+        const tableElement: QuestionElement = {
+          type: 'table',
+          data: {
+            headers: ['気温 [℃]', '5', '10', '15', '20', '25', '30'],
+            rows: [
+              ['飽和水蒸気量 [g/m³]', '6.8', '9.4', '12.8', '17.3', '23.1', '30.4']
+            ]
+          }
+        };
+
+        const graphElement: QuestionElement = {
+          type: 'graph',
+          data: {
+            type: 'line',
+            xAxis: { label: '気温', min: 0, max: 30, step: 5, unit: '℃' },
+            yAxis: { label: '水蒸気量', min: 0, max: 35, step: 5, unit: 'g/m³' },
+            points: Object.entries(this.saturationTable)
+              .map(([t, v]) => ({ x: Number(t), y: v }))
+              .sort((a, b) => a.x - b.x)
+          }
+        };
+
         questionsList.push({
-          text: `問${i}. 下の表を参考にして、あとの問いに答えなさい。気温が ${temp}℃ で、空気 1m³ 中に含まれる水蒸気量が ${actual}g の空気がある。`,
-          answer: "", // 大問自体に答えはなし
+          text: `問${i}. 下の${isGraph ? 'グラフ' : '表'}を参考にして、あとの問いに答えなさい。気温が ${temp}℃ で、空気 1m³ 中に含まれる水蒸気量が ${actual}g の空気がある。`,
+          answer: "",
           unit: "",
-          elements: [{
-            type: 'table',
-            data: {
-              headers: ['気温 [℃]', '5', '10', '15', '20', '25', '30'],
-              rows: [
-                ['飽和水蒸気量 [g/m³]', '6.8', '9.4', '12.8', '17.3', '23.1', '30.4']
-              ]
-            }
-          }],
+          elements: [isGraph ? graphElement : tableElement],
           subQuestions: [
             {
               text: "(1) このときの空気の湿度は何%か。小数第1位を四捨五入して答えなさい。",

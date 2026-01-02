@@ -121,10 +121,16 @@ export function GeneratorClient() {
                   図解（グラフ・表あり）
                 </option>
                 <option 
-                  value="comprehensive" 
+                  value="comprehensive_table" 
                   disabled={topic !== 'humidity'}
                 >
-                  大問（導入文＋小問形式）
+                  大問（表形式）
+                </option>
+                <option 
+                  value="comprehensive_graph" 
+                  disabled={topic !== 'humidity'}
+                >
+                  大問（グラフ形式）
                 </option>
               </select>
               {(topic !== 'omega' && topic !== 'humidity') && (

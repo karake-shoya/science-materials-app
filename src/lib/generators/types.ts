@@ -1,4 +1,4 @@
-export type GeneratorFormat = 'basic' | 'graphical' | 'comprehensive';
+export type GeneratorFormat = 'basic' | 'graphical' | 'comprehensive' | 'comprehensive_table' | 'comprehensive_graph';
 
 export interface GraphData {
   type: 'line' | 'scatter';
