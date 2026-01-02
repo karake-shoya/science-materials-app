@@ -55,8 +55,8 @@ export async function GET(request: NextRequest) {
     }
 
     // 描画設定（形式に応じて動的に変更）
-    const QUESTIONS_PER_PAGE = format === 'graphical' ? 3 : 10;
-    const lineHeight = format === 'graphical' ? 65 : 20;
+    const QUESTIONS_PER_PAGE = format === 'comprehensive' ? 1 : format === 'graphical' ? 3 : 10;
+    const lineHeight = format === 'comprehensive' ? 0 : format === 'graphical' ? 65 : 20;
 
     const drawPage = (title: string, pageQuestions: QuestionData[], isAnswerKey: boolean) => {
       const width = 210;
@@ -70,10 +70,10 @@ export async function GET(request: NextRequest) {
       const startY = 70;
 
       pageQuestions.forEach((q, idx) => {
-        const currentY = startY + idx * lineHeight;
-        doc.setFontSize(11); // 各問題の開始時にフォントサイズをリセット
+        const currentY = format === 'comprehensive' ? startY : startY + idx * lineHeight;
+        doc.setFontSize(11);
         const indentX = 32;
-        const textMaxWidth = 125; // 図表が入る可能性を考慮して少し狭める
+        const textMaxWidth = 125;
         const contentWidth = textMaxWidth - (indentX - 20);
         
         const prefixMatch = q.text.match(/^問\d+\.\s*/);
@@ -84,34 +84,62 @@ export async function GET(request: NextRequest) {
         const lines = doc.splitTextToSize(mainText, contentWidth);
         doc.text(lines, indentX, currentY);
 
+        let nextY = currentY + (lines.length * 5) + 2;
+
         // 図表 (Elements) の描画
         if (q.elements && q.elements.length > 0) {
-          q.elements.forEach((el, elIdx) => {
-            const elY = currentY + (lines.length * 5) + 2;
+          q.elements.forEach((el) => {
             if (el.type === 'graph') {
-              const g = el.data as any; // 型定義の都合上一旦any
-              drawGraph(doc, 32, elY, 50, 40, g);
+              drawGraph(doc, 32, nextY, 50, 40, el.data);
+              nextY += 55;
             } else if (el.type === 'table') {
-              const t = el.data as any;
-              drawTable(doc, 32, elY, t);
+              drawTable(doc, 32, nextY, el.data);
+              const tableRows = (el.data as any).rows.length + 1;
+              nextY += (tableRows * 7) + 10;
             }
           });
         }
 
-        // 解答欄の四角
-        const boxX = 160;
-        const boxY = currentY - 1;
-        const boxW = 35;
-        const boxH = 12;
-        doc.rect(boxX, boxY, boxW, boxH);
+        // 小問 (SubQuestions) の描画
+        if (q.subQuestions && q.subQuestions.length > 0) {
+          q.subQuestions.forEach((sq, sIdx) => {
+            const sqY = nextY + sIdx * 25;
+            doc.setFontSize(11);
+            doc.text(sq.text, 25, sqY);
+            
+            // 下線付きの解答欄 (小問用) - 1行下にずらす
+            const ansX = 140;
+            const lineY = sqY + 8; // 元の +2 から +8 に変更
+            doc.line(ansX, lineY, ansX + 50, lineY);
+            doc.setFontSize(9);
+            doc.text("答え:", ansX - 10, lineY - 1);
 
-        if (isAnswerKey) {
-          doc.saveGraphicsState();
-          doc.setTextColor(255, 0, 0);
-          doc.setFontSize(14);
-          const answerText = `${q.answer} ${q.unit}`;
-          doc.text(answerText, boxX + boxW / 2, boxY + boxH / 2 + 4, { align: 'center' });
-          doc.restoreGraphicsState();
+            if (isAnswerKey) {
+              doc.saveGraphicsState();
+              doc.setTextColor(255, 0, 0);
+              doc.setFontSize(12);
+              doc.text(`${sq.answer} ${sq.unit}`, ansX + 25, lineY - 1, { align: 'center' });
+              doc.restoreGraphicsState();
+            }
+          });
+        }
+
+        // 通常モード用解答欄
+        if (!q.subQuestions) {
+          const boxX = 160;
+          const boxY = currentY - 1;
+          const boxW = 35;
+          const boxH = 12;
+          doc.rect(boxX, boxY, boxW, boxH);
+
+          if (isAnswerKey) {
+            doc.saveGraphicsState();
+            doc.setTextColor(255, 0, 0);
+            doc.setFontSize(14);
+            const answerText = `${q.answer} ${q.unit}`;
+            doc.text(answerText, boxX + boxW / 2, boxY + boxH / 2 + 4, { align: 'center' });
+            doc.restoreGraphicsState();
+          }
         }
       });
     };

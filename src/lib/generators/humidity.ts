@@ -17,6 +17,62 @@ export class HumidityGenerator implements ProblemGenerator {
     const questionsList: QuestionData[] = [];
     const tempsArr = Object.keys(this.saturationTable).map(Number);
 
+    if (format === 'comprehensive') {
+      // 総合問題（大問）モード
+      for (let i = 1; i <= count; i++) {
+        // 設定値の決定
+        const temp = [20, 25, 30][Math.floor(Math.random() * 3)]; // 比較的高めの気温
+        const satVal = this.saturationTable[temp];
+        
+        // 露点が整数になるように、テーブル内の別の温度の飽和水蒸気量を「実際に含まれる量」とする
+        const dewPoint = [5, 10, 15][Math.floor(Math.random() * 3)];
+        const actual = this.saturationTable[dewPoint];
+        
+        const humidity = (actual / satVal) * 100;
+        const lowTemp = dewPoint - 5;
+        const lowSatVal = this.saturationTable[lowTemp];
+        const droplets = actual - lowSatVal;
+
+        questionsList.push({
+          text: `問${i}. 下の表を参考にして、あとの問いに答えなさい。気温が ${temp}℃ で、空気 1m³ 中に含まれる水蒸気量が ${actual}g の空気がある。`,
+          answer: "", // 大問自体に答えはなし
+          unit: "",
+          elements: [{
+            type: 'table',
+            data: {
+              headers: ['気温 [℃]', '5', '10', '15', '20', '25', '30'],
+              rows: [
+                ['飽和水蒸気量 [g/m³]', '6.8', '9.4', '12.8', '17.3', '23.1', '30.4']
+              ]
+            }
+          }],
+          subQuestions: [
+            {
+              text: "(1) このときの空気の湿度は何%か。小数第1位を四捨五入して答えなさい。",
+              answer: Math.round(humidity).toString(),
+              unit: "%"
+            },
+            {
+              text: "(2) この空気 1m³ 中に、あと何gの水蒸気を含むことができるか。",
+              answer: (satVal - actual).toFixed(1),
+              unit: "g"
+            },
+            {
+              text: "(3) この空気の露点は何℃か。",
+              answer: dewPoint.toString(),
+              unit: "℃"
+            },
+            {
+              text: `(4) この空気の温度を ${lowTemp}℃ まで下げたとき、空気 1m³ あたり何gの水滴が出るか。`,
+              answer: droplets.toFixed(1),
+              unit: "g"
+            }
+          ]
+        });
+      }
+      return questionsList;
+    }
+
     for (let i = 1; i <= count; i++) {
       const qType = Math.floor(Math.random() * 2) + 1; // 1:湿度, 2:水蒸気量
       let qText = '';

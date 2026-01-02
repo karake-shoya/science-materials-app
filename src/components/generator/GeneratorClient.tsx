@@ -120,9 +120,18 @@ export function GeneratorClient() {
                 >
                   図解（グラフ・表あり）
                 </option>
+                <option 
+                  value="comprehensive" 
+                  disabled={topic !== 'humidity'}
+                >
+                  大問（導入文＋小問形式）
+                </option>
               </select>
               {(topic !== 'omega' && topic !== 'humidity') && (
-                <p className="text-[10px] text-muted-foreground">※この単元は図解モードに未対応です</p>
+                <p className="text-[10px] text-muted-foreground">※この単元は図解・大問モードに未対応です</p>
+              )}
+              {(topic === 'omega') && (
+                <p className="text-[10px] text-muted-foreground">※この単元は大問モードに未対応です</p>
               )}
             </div>
 

@@ -1,4 +1,4 @@
-export type GeneratorFormat = 'basic' | 'graphical';
+export type GeneratorFormat = 'basic' | 'graphical' | 'comprehensive';
 
 export interface GraphData {
   type: 'line' | 'scatter';
@@ -17,11 +17,18 @@ export interface QuestionElement {
   data: GraphData | TableData;
 }
 
+export interface SubQuestion {
+  text: string;
+  answer: string;
+  unit: string;
+}
+
 export interface QuestionData {
   text: string;
   answer: string;
   unit: string;
   elements?: QuestionElement[];
+  subQuestions?: SubQuestion[];
 }
 
 export interface GeneratorResult {
