@@ -7,9 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Label } from "@/components/ui/label"
 import { Loader2 } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
+import { SCIENCE_TOPICS } from '@/lib/generators/types';
 
 export function GeneratorClient() {
   const [count, setCount] = useState<number | string>(5);
+  const [topic, setTopic] = useState('omega');
+  const [selectedGrade, setSelectedGrade] = useState<number | 'all'>('all');
   const [withAnswers, setWithAnswers] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -23,7 +26,7 @@ export function GeneratorClient() {
     const numCount = typeof count === 'string' ? (parseInt(count) || 5) : count;
     
     setTimeout(() => {
-        const url = `/api/generate-pdf?count=${numCount}&with_answers=${withAnswers}&t=${Date.now()}`;
+        const url = `/api/generate-pdf?count=${numCount}&topic=${topic}&with_answers=${withAnswers}&t=${Date.now()}`;
         setPdfUrl(url);
         // 簡易実装: 生成リクエスト完了として1秒後にローディング解除
         setTimeout(() => setIsLoading(false), 1000);
@@ -44,6 +47,42 @@ export function GeneratorClient() {
             <CardDescription>生成条件を指定してください</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="grade">学年</Label>
+              <select 
+                id="grade"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={selectedGrade}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setSelectedGrade(val === 'all' ? 'all' : parseInt(val));
+                }}
+              >
+                <option value="all">すべて</option>
+                <option value="1">中学1年</option>
+                <option value="2">中学2年</option>
+                <option value="3">中学3年</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="topic">単元</Label>
+              <select 
+                id="topic"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+              >
+                {SCIENCE_TOPICS
+                  .filter(t => selectedGrade === 'all' || t.grade === selectedGrade)
+                  .map(t => (
+                    <option key={t.id} value={t.id}>
+                      {t.grade === 1 ? '【中1】' : t.grade === 2 ? '【中2】' : '【中3】'} {t.name}
+                    </option>
+                ))}
+              </select>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="count">問題数 (1-50)</Label>
               <Input 
@@ -83,11 +122,6 @@ export function GeneratorClient() {
                     "PDFを作成してプレビュー"
                 )}
               </Button>
-            </div>
-
-            <div className="text-sm text-gray-500 mt-4">
-                <p>※ 生成処理はサーバー上で行われます。</p>
-                <p>※ 現在は「中2理科 オームの法則」に対応しています。</p>
             </div>
           </CardContent>
         </Card>
