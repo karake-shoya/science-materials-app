@@ -107,9 +107,9 @@ export async function GET(request: NextRequest) {
             doc.setFontSize(11);
             doc.text(sq.text, 25, sqY);
             
-            // 下線付きの解答欄 (小問用) - 1行下にずらす
+            // 下線付きの解答欄 (小問用) - さらに1行下にずらす
             const ansX = 140;
-            const lineY = sqY + 8; // 元の +2 から +8 に変更
+            const lineY = sqY + 14; // sqY + 8 から sqY + 14 に変更
             doc.line(ansX, lineY, ansX + 50, lineY);
             doc.setFontSize(9);
             doc.text("答え:", ansX - 10, lineY - 1);
