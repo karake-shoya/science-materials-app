@@ -1,9 +1,9 @@
-import { ProblemGenerator, QuestionData } from './types';
+import { ProblemGenerator, QuestionData, GeneratorFormat } from './types';
 
 export class PowerGenerator implements ProblemGenerator {
   title = "中2理科 電力・熱量・電力量 練習問題";
 
-  generate(count: number): QuestionData[] {
+  generate(count: number, format: GeneratorFormat): QuestionData[] {
     const questionsList: QuestionData[] = [];
     for (let i = 1; i <= count; i++) {
       const qType = Math.floor(Math.random() * 3) + 1; // 1:電力, 2:熱量(J), 3:電力量(Wh)

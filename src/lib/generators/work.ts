@@ -1,9 +1,9 @@
-import { ProblemGenerator, QuestionData } from './types';
+import { ProblemGenerator, QuestionData, GeneratorFormat } from './types';
 
 export class WorkGenerator implements ProblemGenerator {
   title = "中3理科 仕事・仕事率 練習問題";
 
-  generate(count: number): QuestionData[] {
+  generate(count: number, format: GeneratorFormat): QuestionData[] {
     const questionsList: QuestionData[] = [];
     for (let i = 1; i <= count; i++) {
       const qType = Math.floor(Math.random() * 3) + 1; // 1:仕事, 2:仕事率, 3:動滑車

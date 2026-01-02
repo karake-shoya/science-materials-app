@@ -1,9 +1,9 @@
-import { ProblemGenerator, QuestionData } from './types';
+import { ProblemGenerator, QuestionData, GeneratorFormat } from './types';
 
 export class SpeedGenerator implements ProblemGenerator {
   title = "中3理科 速さ 練習問題";
 
-  generate(count: number): QuestionData[] {
+  generate(count: number, format: GeneratorFormat): QuestionData[] {
     const questionsList: QuestionData[] = [];
     for (let i = 1; i <= count; i++) {
       const qType = Math.floor(Math.random() * 3) + 1; // 1:速さ, 2:距離, 3:時間

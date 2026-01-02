@@ -1,7 +1,27 @@
+export type GeneratorFormat = 'basic' | 'graphical';
+
+export interface GraphData {
+  type: 'line' | 'scatter';
+  xAxis: { label: string; min: number; max: number; step: number; unit?: string };
+  yAxis: { label: string; min: number; max: number; step: number; unit?: string };
+  points: { x: number; y: number }[];
+}
+
+export interface TableData {
+  headers: string[];
+  rows: string[][];
+}
+
+export interface QuestionElement {
+  type: 'graph' | 'table';
+  data: GraphData | TableData;
+}
+
 export interface QuestionData {
   text: string;
   answer: string;
   unit: string;
+  elements?: QuestionElement[];
 }
 
 export interface GeneratorResult {
@@ -29,6 +49,6 @@ export const SCIENCE_TOPICS: ScienceTopic[] = [
 ];
 
 export interface ProblemGenerator {
-  generate(count: number): QuestionData[];
+  generate(count: number, format: GeneratorFormat): QuestionData[];
   title: string;
 }

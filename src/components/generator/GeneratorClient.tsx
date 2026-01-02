@@ -13,6 +13,7 @@ export function GeneratorClient() {
   const [count, setCount] = useState<number | string>(5);
   const [topic, setTopic] = useState('omega');
   const [selectedGrade, setSelectedGrade] = useState<number | 'all'>('all');
+  const [format, setFormat] = useState<'basic' | 'graphical'>('basic');
   const [withAnswers, setWithAnswers] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -26,7 +27,7 @@ export function GeneratorClient() {
     const numCount = typeof count === 'string' ? (parseInt(count) || 5) : count;
     
     setTimeout(() => {
-        const url = `/api/generate-pdf?count=${numCount}&topic=${topic}&with_answers=${withAnswers}&t=${Date.now()}`;
+        const url = `/api/generate-pdf?count=${numCount}&topic=${topic}&with_answers=${withAnswers}&format=${format}&t=${Date.now()}`;
         setPdfUrl(url);
         // 簡易実装: 生成リクエスト完了として1秒後にローディング解除
         setTimeout(() => setIsLoading(false), 1000);
@@ -71,7 +72,13 @@ export function GeneratorClient() {
                 id="topic"
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 value={topic}
-                onChange={(e) => setTopic(e.target.value)}
+                onChange={(e) => {
+                  const newTopic = e.target.value;
+                  setTopic(newTopic);
+                  if (newTopic !== 'omega' && newTopic !== 'humidity') {
+                    setFormat('basic');
+                  }
+                }}
               >
                 {SCIENCE_TOPICS
                   .filter(t => selectedGrade === 'all' || t.grade === selectedGrade)
@@ -96,6 +103,27 @@ export function GeneratorClient() {
                   setCount(val === "" ? "" : parseInt(val));
                 }}
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="format">出力形式</Label>
+              <select 
+                id="format"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={format}
+                onChange={(e) => setFormat(e.target.value as 'basic' | 'graphical')}
+              >
+                <option value="basic">通常（一問一答）</option>
+                <option 
+                  value="graphical" 
+                  disabled={topic !== 'omega' && topic !== 'humidity'}
+                >
+                  図解（グラフ・表あり）
+                </option>
+              </select>
+              {(topic !== 'omega' && topic !== 'humidity') && (
+                <p className="text-[10px] text-muted-foreground">※この単元は図解モードに未対応です</p>
+              )}
             </div>
 
             <div className="flex items-center space-x-2">

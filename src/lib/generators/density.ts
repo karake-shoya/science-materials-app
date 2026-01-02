@@ -1,9 +1,9 @@
-import { ProblemGenerator, QuestionData } from './types';
+import { ProblemGenerator, QuestionData, GeneratorFormat } from './types';
 
 export class DensityGenerator implements ProblemGenerator {
   title = "中1理科 密度 練習問題";
 
-  generate(count: number): QuestionData[] {
+  generate(count: number, format: GeneratorFormat): QuestionData[] {
     const questionsList: QuestionData[] = [];
     for (let i = 1; i <= count; i++) {
       const qType = Math.floor(Math.random() * 3) + 1; // 1:密度, 2:質量, 3:体積

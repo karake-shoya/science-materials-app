@@ -3,7 +3,7 @@ import { jsPDF } from 'jspdf';
 import fs from 'fs';
 import path from 'path';
 import { getGenerator } from '@/lib/generators/factory';
-import { QuestionData } from '@/lib/generators/types';
+import { QuestionData, GeneratorFormat } from '@/lib/generators/types';
 
 // フォント設定
 const FONT_NAME = 'CustomFont';
@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
   const countStr = searchParams.get('count') || '5';
   const withAnswers = searchParams.get('with_answers') === 'true';
   const topic = searchParams.get('topic') || 'omega';
+  const format = (searchParams.get('format') || 'basic') as GeneratorFormat;
   
   // バリデーション
   const numCount = parseInt(countStr);
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
   try {
     // ジェネレーターを取得して問題を生成
     const generator = getGenerator(topic);
-    const questionsList = generator.generate(numCount);
+    const questionsList = generator.generate(numCount, format);
     const titleBase = generator.title;
 
     // PDF生成 (jsPDFを使用)
@@ -53,8 +54,10 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 描画関数
-    const QUESTIONS_PER_PAGE = 10;
+    // 描画設定（形式に応じて動的に変更）
+    const QUESTIONS_PER_PAGE = format === 'graphical' ? 3 : 10;
+    const lineHeight = format === 'graphical' ? 65 : 20;
+
     const drawPage = (title: string, pageQuestions: QuestionData[], isAnswerKey: boolean) => {
       const width = 210;
       doc.setFontSize(20);
@@ -65,25 +68,35 @@ export async function GET(request: NextRequest) {
 
       doc.setFontSize(11);
       const startY = 70;
-      const lineHeight = 20;
 
       pageQuestions.forEach((q, idx) => {
         const currentY = startY + idx * lineHeight;
-        const indentX = 32; // 本文の開始x座標 (インデント位置)
-        const textMaxWidth = 140; // 折り返し幅
-        const contentWidth = textMaxWidth - (indentX - 20); // 本文の有効幅
+        doc.setFontSize(11); // 各問題の開始時にフォントサイズをリセット
+        const indentX = 32;
+        const textMaxWidth = 125; // 図表が入る可能性を考慮して少し狭める
+        const contentWidth = textMaxWidth - (indentX - 20);
         
-        // 「問x. 」の部分と本文を分離
         const prefixMatch = q.text.match(/^問\d+\.\s*/);
         const prefix = prefixMatch ? prefixMatch[0] : "";
         const mainText = q.text.replace(prefix, "");
 
-        // 1. 番号 (問x.) を描画
         doc.text(prefix, 20, currentY);
-
-        // 2. 本文を分割して描画 (インデント位置から開始)
         const lines = doc.splitTextToSize(mainText, contentWidth);
         doc.text(lines, indentX, currentY);
+
+        // 図表 (Elements) の描画
+        if (q.elements && q.elements.length > 0) {
+          q.elements.forEach((el, elIdx) => {
+            const elY = currentY + (lines.length * 5) + 2;
+            if (el.type === 'graph') {
+              const g = el.data as any; // 型定義の都合上一旦any
+              drawGraph(doc, 32, elY, 50, 40, g);
+            } else if (el.type === 'table') {
+              const t = el.data as any;
+              drawTable(doc, 32, elY, t);
+            }
+          });
+        }
 
         // 解答欄の四角
         const boxX = 160;
@@ -100,6 +113,93 @@ export async function GET(request: NextRequest) {
           doc.text(answerText, boxX + boxW / 2, boxY + boxH / 2 + 4, { align: 'center' });
           doc.restoreGraphicsState();
         }
+      });
+    };
+
+    // グラフ描画ヘルパー
+    const drawGraph = (doc: jsPDF, x: number, y: number, w: number, h: number, data: any) => {
+      doc.setLineWidth(0.5);
+      // 軸
+      doc.line(x, y, x, y + h); // Y軸
+      doc.line(x, y + h, x + w, y + h); // X軸
+      
+      doc.setFontSize(8);
+      // X軸ラベル
+      doc.text(data.xAxis.label + (data.xAxis.unit ? ` [${data.xAxis.unit}]` : ""), x + w/2, y + h + 8, { align: 'center' });
+      // Y軸ラベル
+      doc.saveGraphicsState();
+      doc.text(data.yAxis.label + (data.yAxis.unit ? ` [${data.yAxis.unit}]` : ""), x - 8, y + h/2, { angle: 90, align: 'center' });
+      doc.restoreGraphicsState();
+
+      // 目盛りと線
+      const { points, xAxis, yAxis } = data;
+      doc.setLineWidth(0.1);
+      doc.setDrawColor(200, 200, 200);
+      
+      // X目盛り
+      for (let i = 0; i <= (xAxis.max - xAxis.min) / xAxis.step; i++) {
+        const val = xAxis.min + i * xAxis.step;
+        const px = x + (val - xAxis.min) / (xAxis.max - xAxis.min) * w;
+        doc.line(px, y, px, y + h);
+        doc.text(Number(val.toFixed(10)).toString(), px, y + h + 4, { align: 'center' });
+      }
+      // Y目盛り
+      for (let i = 0; i <= (yAxis.max - yAxis.min) / yAxis.step; i++) {
+        const val = yAxis.min + i * yAxis.step;
+        const py = y + h - (val - yAxis.min) / (yAxis.max - yAxis.min) * h;
+        doc.line(x, py, x + w, py);
+        doc.text(Number(val.toFixed(10)).toString(), x - 2, py + 1, { align: 'right' });
+      }
+
+      // データプロット
+      if (points.length > 0) {
+        doc.setLineWidth(0.8);
+        doc.setDrawColor(0, 0, 0);
+        points.forEach((p: any, i: number) => {
+          const px = x + (p.x - xAxis.min) / (xAxis.max - xAxis.min) * w;
+          const py = y + h - (p.y - yAxis.min) / (yAxis.max - yAxis.min) * h;
+          if (i > 0) {
+            const prev = points[i-1];
+            const ppx = x + (prev.x - xAxis.min) / (xAxis.max - xAxis.min) * w;
+            const ppy = y + h - (prev.y - yAxis.min) / (yAxis.max - yAxis.min) * h;
+            doc.line(ppx, ppy, px, py);
+          }
+          doc.circle(px, py, 0.5, 'F');
+        });
+      }
+    };
+
+    // 表描画ヘルパー
+    const drawTable = (doc: jsPDF, x: number, y: number, data: any) => {
+      const firstColWidth = 40;
+      const otherColWidth = 12;
+      const cellH = 7; // 少し高さを広げる
+      doc.setFontSize(9);
+      doc.setLineWidth(0.2);
+
+      const getColWidth = (index: number) => index === 0 ? firstColWidth : otherColWidth;
+      const getXOffset = (index: number) => {
+        let offset = 0;
+        for (let k = 0; k < index; k++) offset += getColWidth(k);
+        return offset;
+      };
+
+      // ヘッダー
+      data.headers.forEach((h: string, i: number) => {
+        const colW = getColWidth(i);
+        const colX = x + getXOffset(i);
+        doc.rect(colX, y, colW, cellH);
+        doc.text(h, colX + colW/2, y + 5, { align: 'center' }); // Y位置調整
+      });
+
+      // データ行
+      data.rows.forEach((row: string[], j: number) => {
+        row.forEach((cell, i) => {
+          const colW = getColWidth(i);
+          const colX = x + getXOffset(i);
+          doc.rect(colX, y + (j + 1) * cellH, colW, cellH);
+          doc.text(cell, colX + colW/2, y + (j + 1) * cellH + 5, { align: 'center' });
+        });
       });
     };
 
