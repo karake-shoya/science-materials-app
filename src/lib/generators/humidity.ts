@@ -60,6 +60,12 @@ export class HumidityGenerator implements ProblemGenerator {
                 y: satVal,
                 label: `${satVal}`,
                 showLines: true
+              },
+              {
+                x: dewPoint,
+                y: actual,
+                label: `${actual}`,
+                showLines: true
               }
             ]
           }

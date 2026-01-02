@@ -222,9 +222,13 @@ export async function GET(request: NextRequest) {
             const nearestStepValue = Math.round(ann.y / yAxis.step) * yAxis.step;
             const nearestStepPy = y + h - (nearestStepValue - yAxis.min) / (yAxis.max - yAxis.min) * h;
             
-            // 垂直距離が3mm未満なら上にずらす
+            // 垂直距離が2mm未満なら重複回避
             if (Math.abs(py - nearestStepPy) < 2) {
-              labelY = py - 1; 
+              if (py < nearestStepPy) {
+                labelY = py - 1; // 目盛りより上にある数値はさらに上へ
+              } else {
+                labelY = py + 2; // 目盛りより下にある数値はさらに下へ
+              }
             }
             
             doc.text(ann.label, x - 2, labelY, { align: 'right' });
