@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckCircle2, Loader2 } from "lucide-react"
 
-export default function VerifiedPage() {
+function VerifiedContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   // 遷移先URLを取得、デフォルトはダッシュボード
@@ -41,5 +41,13 @@ export default function VerifiedPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function VerifiedPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>}>
+      <VerifiedContent />
+    </Suspense>
   )
 }
