@@ -37,111 +37,112 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: calc(var(--radius));
+  --radius-lg: calc(var(--radius) + 2px);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
 }
 
 :root {
-  --radius: 0.5rem;
-  /* 温かみのあるオフホワイト */
-  --background: oklch(0.985 0.002 90);
-  --foreground: oklch(0.25 0.02 250);
+  /* Science Green Theme */
+  --radius: 0.3rem; /* Sharper, more technical look */
   
-  /* カード - クリーンな白 */
+  /* Base: Slight green tint paper */
+  --background: oklch(0.97 0.01 150);
+  --foreground: oklch(0.25 0.02 150);
+  
+  /* Card: Clean white for contrast */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.25 0.02 250);
+  --card-foreground: oklch(0.25 0.02 150);
   
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.25 0.02 250);
+  --popover-foreground: oklch(0.25 0.02 150);
   
-  /* プライマリ - ティール/シアン系 */
-  --primary: oklch(0.55 0.15 180);
-  --primary-foreground: oklch(0.98 0 0);
+  /* Primary: Deep Science Green */
+  --primary: oklch(0.45 0.12 150); 
+  --primary-foreground: oklch(0.98 0.01 150);
   
-  /* セカンダリ - ウォームグレー */
-  --secondary: oklch(0.95 0.01 80);
-  --secondary-foreground: oklch(0.35 0.02 250);
+  /* Secondary: Light Lab Green */
+  --secondary: oklch(0.92 0.03 150);
+  --secondary-foreground: oklch(0.35 0.05 150);
   
-  /* ミューテッド */
-  --muted: oklch(0.96 0.005 80);
-  --muted-foreground: oklch(0.5 0.02 250);
+  /* Muted: Grayish Green */
+  --muted: oklch(0.94 0.01 150);
+  --muted-foreground: oklch(0.5 0.03 150);
   
-  /* アクセント - アンバー */
-  --accent: oklch(0.82 0.16 75);
-  --accent-foreground: oklch(0.3 0.05 60);
+  /* Accent: Warning Amber/Orange */
+  --accent: oklch(0.75 0.18 70);
+  --accent-foreground: oklch(0.25 0.02 70);
   
-  --destructive: oklch(0.55 0.22 25);
+  --destructive: oklch(0.6 0.2 25);
   
-  /* ボーダー */
-  --border: oklch(0.88 0.01 80);
-  --input: oklch(0.92 0.01 80);
-  --ring: oklch(0.55 0.15 180);
+  /* Border */
+  --border: oklch(0.88 0.02 150);
+  --input: oklch(0.92 0.02 150);
+  --ring: oklch(0.45 0.12 150);
   
-  /* チャート */
-  --chart-1: oklch(0.55 0.15 180);
-  --chart-2: oklch(0.7 0.14 150);
-  --chart-3: oklch(0.75 0.15 75);
-  --chart-4: oklch(0.6 0.18 30);
-  --chart-5: oklch(0.65 0.12 280);
+  /* Charts - Science colors */
+  --chart-1: oklch(0.45 0.12 150); /* Green */
+  --chart-2: oklch(0.5 0.15 130);  /* Yellow-Green */
+  --chart-3: oklch(0.4 0.1 200);   /* Blue-Green */
+  --chart-4: oklch(0.75 0.18 70);  /* Amber */
+  --chart-5: oklch(0.6 0.2 25);    /* Red */
   
-  /* サイドバー */
-  --sidebar: oklch(0.98 0.005 80);
-  --sidebar-foreground: oklch(0.25 0.02 250);
-  --sidebar-primary: oklch(0.55 0.15 180);
+  /* Sidebar - Consistent with App */
+  --sidebar: oklch(0.96 0.01 150);
+  --sidebar-foreground: oklch(0.3 0.02 150);
+  --sidebar-primary: oklch(0.45 0.12 150);
   --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.94 0.01 80);
-  --sidebar-accent-foreground: oklch(0.35 0.02 250);
-  --sidebar-border: oklch(0.9 0.01 80);
-  --sidebar-ring: oklch(0.55 0.15 180);
+  --sidebar-accent: oklch(0.92 0.02 150);
+  --sidebar-accent-foreground: oklch(0.3 0.02 150);
+  --sidebar-border: oklch(0.88 0.02 150);
+  --sidebar-ring: oklch(0.45 0.12 150);
 }
 
 .dark {
-  --background: oklch(0.15 0.02 250);
-  --foreground: oklch(0.95 0.01 80);
+  /* Blackboard Theme */
+  --background: oklch(0.18 0.03 150); /* Deep Green Black */
+  --foreground: oklch(0.95 0.01 150); /* Chalk White */
   
-  --card: oklch(0.2 0.02 250);
-  --card-foreground: oklch(0.95 0.01 80);
+  --card: oklch(0.22 0.03 150);
+  --card-foreground: oklch(0.95 0.01 150);
   
-  --popover: oklch(0.2 0.02 250);
-  --popover-foreground: oklch(0.95 0.01 80);
+  --popover: oklch(0.22 0.03 150);
+  --popover-foreground: oklch(0.95 0.01 150);
   
-  --primary: oklch(0.7 0.15 180);
-  --primary-foreground: oklch(0.15 0.02 250);
+  --primary: oklch(0.65 0.15 150); /* Brighter Green on Dark */
+  --primary-foreground: oklch(0.15 0.02 150);
   
-  --secondary: oklch(0.25 0.02 250);
-  --secondary-foreground: oklch(0.9 0.01 80);
+  --secondary: oklch(0.28 0.04 150);
+  --secondary-foreground: oklch(0.9 0.01 150);
   
-  --muted: oklch(0.25 0.02 250);
-  --muted-foreground: oklch(0.65 0.02 250);
+  --muted: oklch(0.25 0.03 150);
+  --muted-foreground: oklch(0.7 0.05 150);
   
-  --accent: oklch(0.75 0.15 75);
-  --accent-foreground: oklch(0.2 0.02 60);
+  --accent: oklch(0.7 0.15 70);
+  --accent-foreground: oklch(0.2 0.02 70);
   
-  --destructive: oklch(0.65 0.2 25);
+  --destructive: oklch(0.6 0.2 25);
   
-  --border: oklch(0.3 0.02 250);
-  --input: oklch(0.25 0.02 250);
-  --ring: oklch(0.7 0.15 180);
+  --border: oklch(0.3 0.03 150);
+  --input: oklch(0.28 0.03 150);
+  --ring: oklch(0.65 0.15 150);
   
-  --chart-1: oklch(0.7 0.15 180);
-  --chart-2: oklch(0.75 0.12 150);
-  --chart-3: oklch(0.8 0.14 75);
-  --chart-4: oklch(0.7 0.16 30);
-  --chart-5: oklch(0.7 0.1 280);
+  --chart-1: oklch(0.65 0.15 150);
+  --chart-2: oklch(0.7 0.15 130);
+  --chart-3: oklch(0.6 0.12 200);
+  --chart-4: oklch(0.7 0.18 70);
+  --chart-5: oklch(0.65 0.15 25);
   
-  --sidebar: oklch(0.18 0.02 250);
-  --sidebar-foreground: oklch(0.95 0.01 80);
-  --sidebar-primary: oklch(0.7 0.15 180);
-  --sidebar-primary-foreground: oklch(0.15 0.02 250);
-  --sidebar-accent: oklch(0.25 0.02 250);
-  --sidebar-accent-foreground: oklch(0.9 0.01 80);
-  --sidebar-border: oklch(0.3 0.02 250);
-  --sidebar-ring: oklch(0.7 0.15 180);
+  --sidebar: oklch(0.2 0.03 150);
+  --sidebar-foreground: oklch(0.95 0.01 150);
+  --sidebar-primary: oklch(0.65 0.15 150);
+  --sidebar-primary-foreground: oklch(0.15 0.02 150);
+  --sidebar-accent: oklch(0.28 0.04 150);
+  --sidebar-accent-foreground: oklch(0.95 0.01 150);
+  --sidebar-border: oklch(0.3 0.03 150);
+  --sidebar-ring: oklch(0.65 0.15 150);
 }
 
 @layer base {
@@ -152,6 +153,26 @@
     @apply bg-background text-foreground;
     font-feature-settings: "palt";
   }
+}
+
+@layer utilities {
+  .animate-float {
+    animation: float 20s infinite linear;
+  }
+  .animate-flow-x {
+    animation: flow-x 60s infinite linear;
+  }
+}
+
+@keyframes float {
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(180deg); }
+  100% { transform: translateY(0) rotate(360deg); }
+}
+
+@keyframes flow-x {
+  0% { background-position: 0 0; }
+  100% { background-position: 100% 100%; }
 }
 
 /* カスタムスクロールバー */

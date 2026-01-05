@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Zap, AlertCircle, CheckCircle2 } from "lucide-react"
+import { Zap, AlertCircle, CheckCircle2, FlaskConical } from "lucide-react"
 import Link from "next/link"
 
 export default async function LoginPage({
@@ -27,7 +27,7 @@ export default async function LoginPage({
         <div className="flex flex-col items-center gap-2 mb-8">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <Zap className="h-6 w-6 text-primary-foreground" />
+              <FlaskConical className="h-6 w-6 text-primary-foreground" />
             </div>
           </Link>
           <h1 className="text-xl font-semibold">ScienceEditor</h1>
@@ -49,7 +49,7 @@ export default async function LoginPage({
                 </div>
               )}
               {message && (
-                <div className="p-3 rounded-md bg-green-500/10 text-green-600 dark:text-green-400 text-sm flex items-center gap-2">
+                <div className="p-3 rounded-md bg-primary/10 text-primary text-sm flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4" />
                   {message}
                 </div>
