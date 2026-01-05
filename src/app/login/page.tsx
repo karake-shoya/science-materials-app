@@ -1,4 +1,4 @@
-import { login, sighnup } from "./actions"
+import { login, signup } from "./actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -10,10 +10,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Zap } from "lucide-react"
+import { Zap, AlertCircle, CheckCircle2 } from "lucide-react"
 import Link from "next/link"
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string; message?: string }>
+}) {
+  const { error, message } = await searchParams
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm space-y-6">
@@ -36,6 +42,18 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent>
             <form className="flex flex-col gap-4">
+              {error && (
+                <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4" />
+                  {error}
+                </div>
+              )}
+              {message && (
+                <div className="p-3 rounded-md bg-green-500/10 text-green-600 dark:text-green-400 text-sm flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4" />
+                  {message}
+                </div>
+              )}
               <div className="flex flex-col gap-2">
                 <Label htmlFor="email" className="text-sm">メールアドレス</Label>
                 <Input 
@@ -44,6 +62,7 @@ export default function LoginPage() {
                   type="email" 
                   placeholder="teacher@school.ed.jp"
                   className="h-10"
+                  required
                 />
               </div>
               <div className="flex flex-col gap-2">
@@ -60,7 +79,7 @@ export default function LoginPage() {
                 <Button formAction={login} className="h-10">
                   ログイン
                 </Button>
-                <Button formAction={sighnup} variant="outline" className="h-10">
+                <Button formAction={signup} variant="outline" className="h-10">
                   新規登録
                 </Button>
               </div>
