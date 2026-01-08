@@ -62,13 +62,6 @@ export default async function Home() {
       <main className="flex-1">
         {/* Hero Section */}
         <section className="container mx-auto px-6 pt-24 pb-20 text-center relative">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-700 text-xs font-bold border border-blue-100 mb-8 animate-in fade-in zoom-in duration-700">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
-            </span>
-            公立・私立中学校 導入校拡大中
-          </div>
           
           <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-[0.9] mb-8 animate-in slide-in-from-bottom-10 duration-1000">
             授業準備を、<br />
