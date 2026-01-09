@@ -35,7 +35,7 @@ export function GeneratorClient() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 h-[calc(100vh-3.5rem)] flex flex-col">
+    <div className="container mx-auto max-w-6xl py-8 px-4 h-[calc(100vh-3.5rem)] flex flex-col">
       <div className="mb-6">
         <h1 className="text-3xl font-bold">教材生成ツール</h1>
         <p className="text-gray-500">問題プリントを自動生成します。</p>
