@@ -170,9 +170,9 @@ export default async function Home() {
                    {/* 簡易的なグラフのビジュアル */}
                    <div className="flex-1 border-l-2 border-b-2 border-slate-300 relative overflow-hidden">
                       <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full">
-                         <path d="M0,100 C20,95 50,80 100,20" fill="none" stroke="#4f46e5" strokeWidth="3" />
-                         <line x1="60" y1="100" x2="60" y2="52" stroke="#4f46e5" strokeDasharray="4" />
-                         <line x1="0" y1="52" x2="60" y2="52" stroke="#4f46e5" strokeDasharray="4" />
+                         <path d="M-30,95 C20,95 50,80 100,20" fill="none" stroke="#4f46e5" strokeWidth="3" />
+                         <line x1="60" y1="100" x2="60" y2="60" stroke="#4f46e5" strokeDasharray="4" />
+                         <line x1="-40" y1="60" x2="60" y2="60" stroke="#4f46e5" strokeDasharray="4" />
                       </svg>
                    </div>
                    <div className="h-4 w-full bg-slate-100 rounded animate-pulse" />
