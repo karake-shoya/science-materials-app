@@ -20,8 +20,8 @@ export async function DashboardHeader() {
             <span className="font-semibold">ScienceEditor</span>
           </Link>
           <Link href="/generator">
-            <Button variant="ghost" size="sm" className="gap-2">
-              <Zap className="h-4 w-4 text-primary-foreground" />
+            <Button variant="ghost" size="sm" className="gap-2 text-primary hover:text-primary hover:bg-primary/10">
+              <Zap className="h-4 w-4 fill-primary" />
               <span className="hidden sm:inline">問題ジェネレーター</span>
             </Button>
           </Link>
