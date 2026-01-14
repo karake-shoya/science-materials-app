@@ -1,4 +1,6 @@
-# 理科教材作成アプリ (Science Materials App)
+# 理科教材作成アプリ (ScienceEditor)
+![generator画面のスクリーンショット]
+(./public/screenshots/generator-visual.png)
 
 このアプリケーションは、学校の先生や生徒が電気回路図や計算問題プリントなどの理科教材を直感的に作成できるように設計されたWebアプリケーションです。
 ブラウザ上で図を作成したり、学習レベルに合わせた問題プリントを自動生成してPDF出力したりすることができます。
