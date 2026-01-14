@@ -65,7 +65,7 @@ export default async function Home() {
         {/* Hero Section */}
         <section className="container mx-auto px-6 pt-24 pb-20 text-center relative">
           
-          <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-[0.9] mb-8 animate-in slide-in-from-bottom-10 duration-1000">
+          <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-[1.1] mb-8 animate-in slide-in-from-bottom-10 duration-1000">
             授業準備を、<br />
             <span className="bg-linear-to-r from-blue-600 via-emerald-500 to-blue-600 bg-size-200 animate-gradient-x bg-clip-text text-transparent">
               「秒」で終わらせる。
@@ -78,13 +78,17 @@ export default async function Home() {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-16 duration-1000 delay-300">
-            <Button size="lg" className="w-full sm:w-auto text-lg h-16 px-10 rounded-2xl shadow-2xl shadow-primary/20 hover:scale-105 transition-all">
-              今すぐ無料で使う
-              <Zap className="ml-2 h-5 w-5 fill-current" />
-            </Button>
-            <Button variant="outline" size="lg" className="w-full sm:w-auto text-lg h-16 px-10 rounded-2xl border-2">
-              教材サンプルを見る
-            </Button>
+            <Link href="/login">
+              <Button size="lg" className="w-full sm:w-auto text-lg h-16 px-10 rounded-2xl shadow-2xl shadow-primary/20 hover:scale-105 transition-all">
+                今すぐ無料で使う
+                <Zap className="ml-2 h-5 w-5 fill-current" />
+              </Button>
+            </Link>
+            <Link href="/samples/sample-material.pdf" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" size="lg" className="w-full sm:w-auto text-lg h-16 px-10 rounded-2xl border-2">
+                問題サンプルを見る（PDF）
+              </Button>
+            </Link>
           </div>
         </section>
         
@@ -215,13 +219,15 @@ export default async function Home() {
               放課後の時間を、<br className="md:hidden"/>自分のために。
             </h2>
             <p className="text-xl opacity-90 mb-12 max-w-xl mx-auto relative z-10 leading-relaxed">
-              教材作成に追われる日々は、今日で終わりにしましょう。<br/>
-              全国の先生が作った教材も、順次公開予定。
+              放課後の職員室で、<br/>
+              もう一度「授業を練る」楽しさを取り戻しましょう。
             </p>
             <div className="relative z-10">
-              <Button size="lg" variant="secondary" className="h-16 px-12 rounded-2xl text-xl font-bold hover:scale-105 transition-all">
-                まずは無料で使ってみる
-              </Button>
+              <Link href="/login">
+                <Button size="lg" variant="secondary" className="h-16 px-12 rounded-2xl text-xl font-bold hover:scale-105 transition-all">
+                  まずは無料で使ってみる
+                </Button>
+              </Link>
             </div>
           </div>
         </section>
