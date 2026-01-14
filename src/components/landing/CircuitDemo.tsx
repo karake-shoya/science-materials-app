@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useRef } from "react"
+import { useState, useCallback, useRef, useEffect } from "react"
 import dynamic from "next/dynamic"
 import { fabric } from "fabric"
 import { Button } from "@/components/ui/button"
@@ -36,6 +36,83 @@ export function CircuitDemo() {
   const onCanvasLoaded = useCallback((canvasInstance: fabric.Canvas) => {
     setCanvas(canvasInstance)
   }, [])
+
+  // デフォルトの回路を生成
+  useEffect(() => {
+    if (!canvas) return
+
+    // 既にオブジェクトがある場合は実行しない
+    if (canvas.getObjects().length > 0) return
+
+    // シンボルを作成
+    const source = Factory.createPowerSource({ left: 300, top: 100 })
+    // @ts-ignore
+    source.id = "demo-source"
+
+    const sw = Factory.createSwitch({ left: 500, top: 100 })
+    // @ts-ignore
+    sw.id = "demo-switch"
+
+    const r1 = Factory.createResistor({ left: 500, top: 320 })
+    // @ts-ignore
+    r1.id = "demo-r1"
+
+    const r2 = Factory.createResistor({ left: 300, top: 320 })
+    // @ts-ignore
+    r2.id = "demo-r2"
+
+    // キャンバスに追加
+    canvas.add(source, sw, r1, r2)
+    canvas.renderAll()
+
+    // 導線を接続 (ReactFlowのノード登録を待つため少し遅延させる)
+    const timer = setTimeout(() => {
+      if (wireOverlayRef.current) {
+        const demoEdges = [
+          {
+            id: "demo-w1",
+            source: "demo-source",
+            sourceHandle: "right-src",
+            target: "demo-switch",
+            targetHandle: "left-tgt",
+            type: "smoothstep",
+            style: { stroke: "#000", strokeWidth: 2 },
+          },
+          {
+            id: "demo-w2",
+            source: "demo-switch",
+            sourceHandle: "right-src",
+            target: "demo-r1",
+            targetHandle: "right-tgt",
+            type: "smoothstep",
+            style: { stroke: "#000", strokeWidth: 2 },
+          },
+          {
+            id: "demo-w3",
+            source: "demo-r1",
+            sourceHandle: "left-src",
+            target: "demo-r2",
+            targetHandle: "right-tgt",
+            type: "smoothstep",
+            style: { stroke: "#000", strokeWidth: 2 },
+          },
+          {
+            id: "demo-w4",
+            source: "demo-r2",
+            sourceHandle: "left-src",
+            target: "demo-source",
+            targetHandle: "left-tgt",
+            type: "smoothstep",
+            style: { stroke: "#000", strokeWidth: 2 },
+          },
+        ]
+        // @ts-ignore
+        wireOverlayRef.current.loadEdges(demoEdges)
+      }
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [canvas])
 
   const handlePlaceSymbol = useCallback((options: PlaceSymbolOptions) => {
     if (!canvas) return
