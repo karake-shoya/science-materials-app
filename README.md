@@ -1,8 +1,8 @@
 # 理科教材作成アプリ (ScienceEditor)
 ![generator画面のスクリーンショット](./public/screenshots/generator-visual.png)
 
-このアプリケーションは、学校の先生や生徒が電気回路図や計算問題プリントなどの理科教材を直感的に作成できるように設計されたWebアプリケーションです。
-ブラウザ上で図を作成したり、学習レベルに合わせた問題プリントを自動生成してPDF出力したりすることができます。
+このアプリケーションは、中学校理科教員が電気回路図や計算問題を直感的に作成できるように設計されたWebアプリケーションです。<br>
+ブラウザ上で回路図を作成したり、問題プリントを自動生成してPDF出力したりすることができます。
 
 ## 主な機能
 
@@ -33,7 +33,7 @@
 - **Language**: TypeScript
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 - **UI Components**: [shadcn/ui](https://ui.shadcn.com/)
-- **Canvas Library**: [Fabric.js](http://fabricjs.com/)
+- **Canvas / Diagram Library**: [Fabric.js](http://fabricjs.com/), [React Flow](https://reactflow.dev/)
 - **PDF Generation**: [jsPDF](https://rawgit.com/MrRio/jsPDF/master/docs/index.html)
 - **Database**: Supabase (PostgreSQL)
 
@@ -71,5 +71,5 @@ npm install
 npm run dev
 ```
 
-ブラウザで [http://localhost:3000](http://localhost:3000) を開くと、アプリケーションが表示されます。
+ブラウザで [http://localhost:3000](http://localhost:3000) を開くと、アプリケーションが表示されます。<br>
 `/editor` で回路図作成、`/generator` でプリント生成機能を利用できます。
