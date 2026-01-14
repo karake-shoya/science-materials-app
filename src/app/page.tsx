@@ -46,7 +46,7 @@ export default async function Home() {
             <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shadow-sm">
               <FlaskConical className="h-5 w-5" />
             </div>
-            <span className="font-bold text-xl tracking-tighter italic text-primary">SciMaterials</span>
+            <span className="font-bold text-xl tracking-tighter italic text-primary">ScienceEditor</span>
           </div>
           <nav className="flex items-center gap-6">
             <Link href="/login" className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
