@@ -11,8 +11,10 @@ import {
   LineChart, 
   Calculator,
   ArrowRight,
-  CheckCircle2
+  CheckCircle2,
+  Play
 } from "lucide-react"
+import { CircuitDemo } from "@/components/landing/CircuitDemo"
 
 export default async function Home() {
   const supabase = await createClient()
@@ -65,7 +67,7 @@ export default async function Home() {
           
           <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-[0.9] mb-8 animate-in slide-in-from-bottom-10 duration-1000">
             授業準備を、<br />
-            <span className="bg-gradient-to-r from-blue-600 via-emerald-500 to-blue-600 bg-size-200 animate-gradient-x bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-blue-600 via-emerald-500 to-blue-600 bg-size-200 animate-gradient-x bg-clip-text text-transparent">
               「秒」で終わらせる。
             </span>
           </h1>
@@ -83,6 +85,27 @@ export default async function Home() {
             <Button variant="outline" size="lg" className="w-full sm:w-auto text-lg h-16 px-10 rounded-2xl border-2">
               教材サンプルを見る
             </Button>
+          </div>
+        </section>
+        
+        {/* Interactive Demo Section */}
+        <section className="bg-slate-50/50 py-24 relative">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-blue-600 font-bold text-sm mb-6 border border-blue-100">
+                <Play className="w-4 h-4" />
+                <span>インタラクティブ体験</span>
+              </div>
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
+                その場で試せる、回路図作成
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                インストール不要。パーツを置いて、線をつなぐだけ。<br className="hidden md:block" />
+                理想の教材が、ブラウザ上で直感的に作成できます。
+              </p>
+            </div>
+            
+            <CircuitDemo />
           </div>
         </section>
 
@@ -152,7 +175,7 @@ export default async function Home() {
             </div>
 
             {/* Feature 4: Humidity Curve Spotlight */}
-            <div className="md:col-span-8 group relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 p-8">
+            <div className="md:col-span-8 group relative overflow-hidden rounded-[2.5rem] bg-linear-to-br from-indigo-50 to-white border border-indigo-100 p-8">
               <div className="flex flex-col md:flex-row gap-8 items-center">
                 <div className="flex-1">
                   <div className="w-12 h-12 rounded-xl bg-indigo-600 text-white flex items-center justify-center mb-6 shadow-lg shadow-indigo-200">
@@ -166,7 +189,7 @@ export default async function Home() {
                     対応単元一覧を見る <ArrowRight className="ml-1 w-4 h-4" />
                   </Button>
                 </div>
-                <div className="flex-1 bg-white rounded-2xl border border-indigo-200 shadow-xl p-4 aspect-[4/3] flex flex-col gap-2">
+                <div className="flex-1 bg-white rounded-2xl border border-indigo-200 shadow-xl p-4 aspect-4/3 flex flex-col gap-2">
                    {/* 簡易的なグラフのビジュアル */}
                    <div className="flex-1 border-l-2 border-b-2 border-slate-300 relative overflow-hidden">
                       <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full">
