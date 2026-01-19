@@ -237,14 +237,14 @@ export default async function Home() {
         <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-2 opacity-50">
             <FlaskConical className="h-5 w-5" />
-            <span className="font-bold tracking-tighter">SciMaterials</span>
+            <span className="font-bold tracking-tighter">ScienceEditor</span>
           </div>
           <p className="text-sm text-muted-foreground tracking-tight">
             © {new Date().getFullYear()} Science Materials Project. All rights reserved.
           </p>
           <div className="flex gap-6 text-sm font-medium text-muted-foreground">
             <a href="#" className="hover:text-primary transition-colors">利用規約</a>
-            <a href="#" className="hover:text-primary transition-colors">お問い合わせ</a>
+            <Link href="/contact" className="hover:text-primary transition-colors">お問い合わせ</Link>
           </div>
         </div>
       </footer>
