@@ -243,7 +243,7 @@ export default async function Home() {
             © {new Date().getFullYear()} Science Materials Project. All rights reserved.
           </p>
           <div className="flex gap-6 text-sm font-medium text-muted-foreground">
-            <a href="#" className="hover:text-primary transition-colors">利用規約</a>
+            <Link href="/terms" className="hover:text-primary transition-colors">利用規約</Link>
             <Link href="/contact" className="hover:text-primary transition-colors">お問い合わせ</Link>
           </div>
         </div>
