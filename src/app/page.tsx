@@ -49,6 +49,9 @@ export default async function Home() {
             <span className="font-bold text-xl tracking-tighter italic text-primary">ScienceEditor</span>
           </div>
           <nav className="flex items-center gap-6">
+            <Link href="/about" className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+              About
+            </Link>
             <Link href="/login" className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
               ログイン
             </Link>
@@ -243,6 +246,7 @@ export default async function Home() {
             © {new Date().getFullYear()} Science Materials Project. All rights reserved.
           </p>
           <div className="flex gap-6 text-sm font-medium text-muted-foreground">
+            <Link href="/about" className="hover:text-primary transition-colors">About</Link>
             <Link href="/terms" className="hover:text-primary transition-colors">利用規約</Link>
             <Link href="/contact" className="hover:text-primary transition-colors">お問い合わせ</Link>
           </div>

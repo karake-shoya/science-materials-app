@@ -211,10 +211,15 @@ export default function ContactPage() {
       </main>
 
       <footer className="py-12 border-t border-border/40 bg-slate-50/50 mt-auto">
-        <div className="container mx-auto px-6 text-center">
+        <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} Science Editor. All rights reserved.
           </p>
+          <div className="flex gap-6 text-sm font-medium text-muted-foreground">
+            <Link href="/about" className="hover:text-primary transition-colors">About</Link>
+            <Link href="/terms" className="hover:text-primary transition-colors">利用規約</Link>
+            <Link href="/contact" className="hover:text-primary transition-colors">お問い合わせ</Link>
+          </div>
         </div>
       </footer>
     </div>
