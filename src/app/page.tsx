@@ -15,6 +15,7 @@ import {
   Play
 } from "lucide-react"
 import { CircuitDemo } from "@/components/landing/CircuitDemo"
+import Image from "next/image"
 
 export default async function Home() {
   const supabase = await createClient()
@@ -66,32 +67,84 @@ export default async function Home() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="container mx-auto px-6 pt-24 pb-20 text-center relative">
-          
-          <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-[1.1] mb-8 animate-in slide-in-from-bottom-10 duration-1000">
-            授業準備を、<br />
-            <span className="bg-linear-to-r from-blue-600 via-emerald-500 to-blue-600 bg-size-200 animate-gradient-x bg-clip-text text-transparent">
-              「秒」で終わらせる。
-            </span>
-          </h1>
-          
-          <p className="text-lg md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-12 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200">
-            回路図、飽和水蒸気量グラフ、オームの法則。<br className="hidden md:block"/>
-            理科教員が「本当に欲しかった」プリント作成ツール。
-          </p>
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-16 duration-1000 delay-300">
-            <Link href="/login">
-              <Button size="lg" className="w-full sm:w-auto text-lg h-16 px-10 rounded-2xl shadow-2xl shadow-primary/20 hover:scale-105 transition-all">
-                今すぐ無料で使う
-                <Zap className="ml-2 h-5 w-5 fill-current" />
-              </Button>
-            </Link>
-            <Link href="/samples/sample-material.pdf" target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="lg" className="w-full sm:w-auto text-lg h-16 px-10 rounded-2xl border-2">
-                問題サンプルを見る（PDF）
-              </Button>
-            </Link>
+        <section className="container mx-auto px-6 pt-16 md:pt-32 pb-20 relative group">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left side: Content */}
+            <div className="text-left space-y-10 relative z-10 animate-in fade-in slide-in-from-left-10 duration-1000">
+              <div className="space-y-4">
+                <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[1.05] text-slate-900">
+                  クリック一つで、<br />
+                  <span className="relative inline-block mt-2">
+                    <span className="relative z-10 text-primary">理想のプリント</span>が
+                    <span className="absolute bottom-2 left-0 w-full h-4 bg-primary/10 -z-10 rounded-sm"></span>
+                  </span>
+                  <br />
+                  完成する。
+                </h1>
+                <div className="h-1 w-24 bg-primary rounded-full"></div>
+              </div>
+              
+              <p className="text-lg md:text-xl text-slate-600 max-w-xl leading-relaxed font-medium">
+                「本当はこういうプリントが欲しかった。」<br className="hidden md:block"/>
+                日本の教科書に準拠した図解と、一瞬で生成される計算問題。<br />
+                理科室のワクワクを、そのまま教材に。
+              </p>
+              
+              <div className="flex flex-wrap items-center justify-start gap-4 pt-4">
+                <Link href="/login" className="w-full sm:w-auto">
+                  <Button size="lg" className="w-full sm:w-auto text-lg h-14 px-8 rounded-2xl shadow-xl shadow-primary/20 hover:shadow-primary/30 hover:-translate-y-0.5 transition-all font-bold bg-primary text-primary-foreground border-none">
+                    無料で体験する
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+                
+                <Link href="/samples/sample-material.pdf" target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto text-base h-14 px-6 rounded-2xl border-slate-200 bg-white/50 shadow-lg shadow-slate-200/50 hover:shadow-xl hover:shadow-slate-200/60 hover:-translate-y-0.5 transition-all font-bold text-slate-700">
+                    サンプルPDFを見る
+                  </Button>
+                </Link>
+
+                <Link href="/about" className="w-full sm:w-auto">
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto text-base h-14 px-6 rounded-2xl border-slate-200 bg-white/50 shadow-lg shadow-slate-200/50 hover:shadow-xl hover:shadow-slate-200/60 hover:-translate-y-0.5 transition-all font-bold text-slate-700">
+                    私たちの想い
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Right side: Interactive App Preview Window */}
+            <div className="hidden lg:block relative h-[500px] animate-in fade-in zoom-in duration-1000 delay-300">
+              <div className="absolute inset-0 bg-linear-to-tr from-primary/10 to-transparent rounded-[3rem] blur-2xl -z-10"></div>
+              
+              <div className="relative h-full w-full perspective-1000">
+                <div className="relative bg-white rounded-4xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] border border-slate-200/60 overflow-hidden group/window hover:-translate-y-4 hover:rotate-x-2 transition-all duration-500 ease-out">
+                  {/* Window Header */}
+                  <div className="h-10 border-b border-slate-100 bg-slate-50/50 flex items-center px-6 justify-between">
+                    <div className="flex gap-2">
+                      <div className="w-3 h-3 rounded-full bg-red-400/20" />
+                      <div className="w-3 h-3 rounded-full bg-amber-400/20" />
+                      <div className="w-3 h-3 rounded-full bg-emerald-400/20" />
+                    </div>
+                    <div className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">ScienceEditor Project</div>
+                    <div className="w-10" />
+                  </div>
+                  
+                  {/* Window Content: App Screenshot */}
+                  <div className="relative aspect-4/3 overflow-hidden">
+                    <Image 
+                      src="/landing/editor-preview.png" 
+                      alt="ScienceEditor Interface Preview"
+                      width={800}
+                      height={600}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Decorative Blur Accents */}
+              <div className="absolute -top-12 -right-12 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
+            </div>
           </div>
         </section>
         
