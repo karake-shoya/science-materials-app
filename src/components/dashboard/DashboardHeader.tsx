@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Zap, LogOut, User, FlaskConical } from 'lucide-react'
+import { Zap, FlaskConical } from 'lucide-react'
 import { signOut } from '@/app/login/actions'
 import { createClient } from '@/lib/supabase/server'
+import { UserMenu } from './UserMenu'
 
 export async function DashboardHeader() {
   const supabase = await createClient()
@@ -27,17 +28,7 @@ export async function DashboardHeader() {
           </Link>
         </div>
         <div className="flex items-center gap-2">
-          <Link href="/mypage">
-            <Button variant="ghost" size="sm" className="gap-2">
-              <User className="h-4 w-4" />
-              <span className="hidden sm:inline">{displayName}</span>
-            </Button>
-          </Link>
-          <form action={signOut}>
-            <Button variant="ghost" size="icon" type="submit" title="ログアウト">
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </form>
+          <UserMenu displayName={displayName} signOutAction={signOut} />
         </div>
       </div>
     </header>
