@@ -44,7 +44,7 @@ export function UserMenu({ displayName, signOutAction }: UserMenuProps) {
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={() => router.push("/mypage")} className="cursor-pointer py-2.5">
             <User className="mr-3 h-4 w-4" />
-            <span className="font-medium">プロフィール設定</span>
+            <span className="font-medium">マイページ</span>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => router.push("/dashboard/security")} className="cursor-pointer py-2.5">
             <Shield className="mr-3 h-4 w-4" />
