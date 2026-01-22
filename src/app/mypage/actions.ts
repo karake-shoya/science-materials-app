@@ -26,6 +26,30 @@ export async function updateDisplayName(formData: FormData) {
   return { success: true }
 }
 
+export async function updateProfile(formData: FormData) {
+  const supabase = await createClient()
+  const jobTitle = formData.get("jobTitle") as string
+  const schoolType = formData.get("schoolType") as string
+  const specialty = formData.get("specialty") as string
+  const preferredPaperSize = formData.get("preferredPaperSize") as string
+
+  const { error } = await supabase.auth.updateUser({
+    data: { 
+      job_title: jobTitle,
+      school_type: schoolType,
+      specialty: specialty,
+      preferred_paper_size: preferredPaperSize
+    }
+  })
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  revalidatePath("/mypage")
+  return { success: true }
+}
+
 export async function updatePassword(formData: FormData) {
   const supabase = await createClient()
   const newPassword = formData.get("newPassword") as string
